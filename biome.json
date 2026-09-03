@@ -1,0 +1,78 @@
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"files": {
+		"includes": [
+			"**"
+		],
+		"ignoreUnknown": true
+	},
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true,
+		"defaultBranch": "main"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"complexity": {
+				"noImplicitCoercions": "error",
+				"noUselessStringConcat": "error",
+				"noUselessUndefined": "error"
+			},
+			"style": {
+				"useAtIndex": "error",
+				"useBlockStatements": "error",
+				"useCollapsedElseIf": "error",
+				"useConsistentBuiltinInstantiation": "error",
+				"useDefaultParameterLast": "error",
+				"useEnumInitializers": "error",
+				"useNumericSeparators": "error",
+				"useShorthandAssign": "error",
+				"useThrowNewError": "error"
+			}
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"preset": "recommended",
+			"source": {
+				"useSortedProperties": "on"
+			}
+		}
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"lineEnding": "lf",
+		"lineWidth": 120,
+		"bracketSpacing": true,
+		"expand": "always",
+		"trailingNewline": true,
+		"useEditorconfig": false
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double",
+			"quoteProperties": "asNeeded",
+			"trailingCommas": "all",
+			"semicolons": "always",
+			"arrowParentheses": "always",
+			"bracketSameLine": true,
+			"operatorLinebreak": "before"
+		}
+	},
+	"json": {
+		"parser": {
+			"allowComments": true,
+			"allowTrailingCommas": true
+		},
+		"formatter": {
+			"trailingCommas": "none",
+			"bracketSpacing": true,
+			"expand": "always"
+		}
+	}
+}

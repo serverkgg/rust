@@ -1,0 +1,32 @@
+name: مشكلة / Bug report
+description: شيء خربان في سيرفر رست أو في الحزمة نفسها / Something broken in the Rust server or the package itself
+labels:
+  - bug
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: وش صار؟ / What happened?
+      description: اشرح المشكلة، ولو تقدر أرفق لوق أو صورة / Describe the problem, attach logs or screenshots if you can
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: وش كنت متوقع؟ / What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: خطوات التكرار / Steps to reproduce
+      description: كيف نوصل لنفس المشكلة؟ / How do we hit the same problem?
+    validations:
+      required: false
+  - type: input
+    id: game-version
+    attributes:
+      label: نسخة اللعبة / Game version
+      placeholder: v0.4.11...
+    validations:
+      required: false

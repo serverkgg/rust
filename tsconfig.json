@@ -1,0 +1,36 @@
+{
+	"compilerOptions": {
+		"allowUnusedLabels": false,
+		"alwaysStrict": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUncheckedIndexedAccess": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"strict": true,
+		"useUnknownInCatchVariables": true,
+		"allowImportingTsExtensions": true,
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"resolveJsonModule": true,
+		"resolvePackageJsonExports": true,
+		"types": [
+			"node",
+			"bun"
+		],
+		"noEmit": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"verbatimModuleSyntax": true,
+		"lib": [
+			"esnext"
+		],
+		"target": "esnext",
+		"skipLibCheck": true
+	},
+	"include": [
+		"./src/**/*.ts"
+	]
+}

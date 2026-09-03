@@ -1,0 +1,171 @@
+# yaml-language-server: $schema=./serverk.schema.json
+schemaVersion: serverk.gg/v1
+kind: GamePackage
+
+metadata:
+  id: rust
+  name:
+    ar: رست
+    en: Rust
+  description:
+    ar: سيرفر رست — عالم مفتوح قاسي، تبدأ بحجر وتنتهي بقاعدة مسلّحة. اجمع الموارد، ابني بيتك، سوّ فريق مع أصحابك، وسوّوا ريد على قواعد غيركم. السيد وحجم الماب والوايب كلها بيدك من اللوحة.
+    en: Rust dedicated servers — a harsh open world where you start with a rock and end with a fortified base. Gather, build, team up with your friends and raid everyone else. The seed, the world size and the wipe are all yours from the panel.
+  tagline:
+    ar: ابني قاعدتك، دافع عنها، وسوّ ريد على غيرك — سيرفرك جاهز خلال دقيقة
+    en: Build your base, defend it, raid the rest — your server, ready in a minute
+  category: survival
+  logo: assets/logo.webp
+  banner: assets/banner.webp
+
+resources:
+  minMemoryMb: 8192
+  recommendedMemoryMb: 16384
+  minDiskMb: 30720
+  playersPerMemoryGb: 6
+  maxRecommendedPlayers: 200
+
+container:
+  image: serverkgg/rust
+  ports:
+    - key: game
+      containerPort: 28015
+      protocol: udp
+      name:
+        ar: رست
+        en: Rust
+      hint:
+        ar: افتح الكونسول داخل اللعبة بزر F1 واكتب client.connect وبعده العنوان زي ما هو.
+        en: Open the in-game console with F1 and type client.connect followed by the address, exactly as shown.
+      hostRange:
+        default: 28015
+        min: 28015
+        max: 28114
+    - key: query
+      containerPort: 28017
+      protocol: udp
+      name:
+        ar: الاستعلام
+        en: Query
+      hint:
+        ar: منفذ الاستعلام — منه يظهر سيرفرك في قائمة سيرفرات رست. اللاعب ما يكتبه أبداً.
+        en: The query port — it is how your server appears in the Rust server browser. Players never type it.
+      hostRange:
+        default: 28115
+        min: 28115
+        max: 28214
+
+backup:
+  only:
+    - server/**
+  except:
+    - server/**/*.map
+    - server/**/*.sav.*
+    - server/**/log/**
+
+reset:
+  keep:
+    - RustDedicated*
+    - "*.so"
+    - steamapps
+    - .steamcmd
+    - .steam
+
+presence:
+  name: player
+  id: steamId
+  fields:
+    - key: ping
+      label:
+        ar: البنق
+        en: Ping
+
+files:
+  protected:
+    - .steamcmd
+    - .steam
+    - steamapps
+    - RustDedicated
+    - RustDedicated_Data
+    - .serverk-install.json
+    - .serverk-wipe
+  notable:
+    - match: server/serverk/cfg/server.cfg
+      label:
+        ar: إعدادات السيرفر
+        en: Server settings
+      icon: settings
+      color: "#cd412b"
+      restart: true
+      note:
+        ar: إعدادات سيرفرك — الاسم، الوصف، عدد اللاعبين، حجم الماب، والسيد. عدّلها من تبويب الإعدادات أفضل، وأي تعديل يبي إعادة تشغيل.
+        en: Your server settings — name, description, player slots, world size and seed. The settings tab is the easier way, and any change needs a restart.
+    - match: server/serverk/cfg/users.cfg
+      label:
+        ar: الأدمن
+        en: Admins
+      icon: shield
+      color: "#4a8fd4"
+      restart: true
+      note:
+        ar: قائمة الأدمن والمشرفين. كل سطر ownerid أو moderatorid ومعه رقم Steam. أضف نفسك هنا عشان تفتح كونسول الأدمن داخل اللعبة بزر F1.
+        en: Your admins and moderators. Each line is an ownerid or moderatorid with a Steam ID. Add yourself here to unlock the in-game admin console on F1.
+    - match: server/serverk/cfg/bans.cfg
+      label:
+        ar: المحظورين
+        en: Bans
+      icon: sword
+      color: "#c77dff"
+      restart: true
+      note:
+        ar: اللاعبين المحظورين. رست يكتب فيه بنفسه لما تحظر أحد من اللوحة أو من الكونسول.
+        en: The banned players. Rust writes this itself whenever you ban somebody from the panel or the console.
+    - match: server/serverk
+      label:
+        ar: بيانات العالم
+        en: World data
+      icon: map
+      color: "#5ba32b"
+      note:
+        ar: الماب وكل شيء مبني فيها وبيانات اللاعبين. لا تعدّل عليه والسيرفر شغّال، وخذ نسخة احتياطية قبل أي شي.
+        en: The map, everything built on it and the player data. Do not touch it while the server runs, and take a backup first.
+
+guideTags:
+  - id: start
+    name:
+      ar: ابدأ من هنا
+      en: Start here
+  - id: wipe
+    name:
+      ar: الوايب
+      en: Wipes
+
+guides:
+  - id: getting-started
+    title:
+      ar: البدء بسيرفرك
+      en: Getting started
+    summary:
+      ar: أنشئ سيرفر رست، ادخله مع أصحابك، وخل نفسك أدمن.
+      en: Create your Rust server, join it with your friends, and make yourself admin.
+    tags:
+      - start
+    surfaces:
+      - overview
+    bodyPath:
+      ar: guides/getting-started/ar.md
+      en: guides/getting-started/en.md
+  - id: wipes
+    title:
+      ar: الوايب — متى وكيف
+      en: Wipes — when and how
+    summary:
+      ar: وش يعني وايب في رست، وش الفرق بين وايب الماب والوايب الكامل، وكيف تسويه من اللوحة.
+      en: What a wipe means in Rust, the difference between a map wipe and a full wipe, and how to run one from the panel.
+    tags:
+      - wipe
+    surfaces:
+      - overview
+      - panel
+    bodyPath:
+      ar: guides/wipes/ar.md
+      en: guides/wipes/en.md

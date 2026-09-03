@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root"
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+
+echo "pre-commit: fix"
+bun run fix
+
+if [ -n "$staged" ]; then
+	fixed=$(git diff --name-only -- $staged || true)
+	if [ -n "$fixed" ]; then
+		echo "pre-commit: restaging fixed files:"
+		echo "$fixed" | sed 's/^/  /'
+		echo "$fixed" | xargs -r git add --
+	fi
+fi
+
+echo "pre-commit: tsc"
+bun run tsc
+
+echo "pre-commit: test"
+bun run test
+
+echo "pre-commit: validate"
+bun run validate
+
+echo "pre-commit: schema"
+bunx serverk-bridge schema --check

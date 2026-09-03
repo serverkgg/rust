@@ -1,0 +1,929 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"oneOf": [
+		{
+			"type": "object",
+			"properties": {
+				"schemaVersion": {
+					"type": "string",
+					"const": "serverk.gg/v1"
+				},
+				"kind": {
+					"type": "string",
+					"const": "GamePackage"
+				},
+				"metadata": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 64,
+							"pattern": "^[a-z0-9][a-z0-9-]*$",
+							"description": "Slug for the game. Also the catalogue URL segment and the image name."
+						},
+						"name": {
+							"type": "object",
+							"properties": {
+								"ar": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 64
+								},
+								"en": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 64
+								}
+							},
+							"required": [
+								"ar",
+								"en"
+							]
+						},
+						"description": {
+							"type": "object",
+							"properties": {
+								"ar": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 600
+								},
+								"en": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 600
+								}
+							},
+							"required": [
+								"ar",
+								"en"
+							]
+						},
+						"tagline": {
+							"type": "object",
+							"properties": {
+								"ar": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 120
+								},
+								"en": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 120
+								}
+							},
+							"required": [
+								"ar",
+								"en"
+							]
+						},
+						"category": {
+							"type": "string",
+							"enum": [
+								"sandbox",
+								"survival",
+								"shooter",
+								"racing",
+								"roleplay",
+								"strategy",
+								"simulation",
+								"other"
+							]
+						},
+						"logo": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 256,
+							"pattern": "^[a-zA-Z0-9][a-zA-Z0-9/_-]*\\.webp$"
+						},
+						"banner": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 256,
+							"pattern": "^[a-zA-Z0-9][a-zA-Z0-9/_-]*\\.webp$"
+						}
+					},
+					"required": [
+						"id",
+						"name",
+						"description",
+						"tagline",
+						"category",
+						"logo",
+						"banner"
+					]
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"minMemoryMb": {
+							"type": "integer",
+							"minimum": 128,
+							"maximum": 1048576
+						},
+						"recommendedMemoryMb": {
+							"type": "integer",
+							"minimum": 128,
+							"maximum": 1048576
+						},
+						"minDiskMb": {
+							"type": "integer",
+							"minimum": 512,
+							"maximum": 9007199254740991
+						},
+						"playersPerMemoryGb": {
+							"type": "integer",
+							"minimum": 1,
+							"maximum": 1024
+						},
+						"maxRecommendedPlayers": {
+							"type": "integer",
+							"minimum": 1,
+							"maximum": 100000
+						}
+					},
+					"required": [
+						"minMemoryMb",
+						"recommendedMemoryMb",
+						"minDiskMb"
+					]
+				},
+				"container": {
+					"type": "object",
+					"properties": {
+						"image": {
+							"type": "string",
+							"pattern": "^serverkgg\\/[a-z0-9][a-z0-9-]*$",
+							"description": "Image repository, always \"serverkgg/\" followed by metadata.id."
+						},
+						"ports": {
+							"minItems": 1,
+							"maxItems": 8,
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"key": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 32,
+										"pattern": "^[a-z][a-z0-9-]*$"
+									},
+									"containerPort": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 65535
+									},
+									"protocol": {
+										"default": "tcp",
+										"type": "string",
+										"enum": [
+											"tcp",
+											"udp"
+										]
+									},
+									"hostRange": {
+										"type": "object",
+										"properties": {
+											"default": {
+												"type": "integer",
+												"minimum": 1024,
+												"maximum": 65535
+											},
+											"min": {
+												"type": "integer",
+												"minimum": 1024,
+												"maximum": 65535
+											},
+											"max": {
+												"type": "integer",
+												"minimum": 1024,
+												"maximum": 65535
+											}
+										},
+										"required": [
+											"default",
+											"min",
+											"max"
+										]
+									},
+									"name": {
+										"description": "Player-facing name of this port, such as Java or Bedrock. The key is shown when omitted.",
+										"type": "object",
+										"properties": {
+											"ar": {
+												"type": "string",
+												"minLength": 1,
+												"maxLength": 48
+											},
+											"en": {
+												"type": "string",
+												"minLength": 1,
+												"maxLength": 48
+											}
+										},
+										"required": [
+											"ar",
+											"en"
+										]
+									},
+									"hint": {
+										"description": "One short line telling the player where this address goes in the game client.",
+										"type": "object",
+										"properties": {
+											"ar": {
+												"type": "string",
+												"minLength": 1,
+												"maxLength": 160
+											},
+											"en": {
+												"type": "string",
+												"minLength": 1,
+												"maxLength": 160
+											}
+										},
+										"required": [
+											"ar",
+											"en"
+										]
+									},
+									"join": {
+										"default": "combined",
+										"description": "How the game client takes the address: combined as host:port, or separate address and port fields.",
+										"type": "string",
+										"enum": [
+											"combined",
+											"separate"
+										]
+									},
+									"srv": {
+										"description": "Publishes this port as an SRV record under the server hostname, so players join by name with no port.",
+										"type": "object",
+										"properties": {
+											"service": {
+												"type": "string",
+												"pattern": "^_[a-z0-9-]{1,15}$"
+											}
+										},
+										"required": [
+											"service"
+										]
+									},
+									"activeWhen": {
+										"default": [],
+										"description": "Conditions on the server's variables that must all hold for the game to listen on this port. The port is still allocated; the panel hides the address otherwise.",
+										"maxItems": 4,
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"variable": {
+													"type": "string",
+													"minLength": 2,
+													"maxLength": 32,
+													"pattern": "^[A-Z][A-Z0-9_]*$"
+												},
+												"values": {
+													"minItems": 1,
+													"maxItems": 16,
+													"type": "array",
+													"items": {
+														"type": "string",
+														"minLength": 1,
+														"maxLength": 128
+													}
+												},
+												"empty": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"variable"
+											]
+										}
+									}
+								},
+								"required": [
+									"key",
+									"containerPort",
+									"hostRange"
+								]
+							}
+						}
+					},
+					"required": [
+						"image",
+						"ports"
+					]
+				},
+				"guideTags": {
+					"default": [],
+					"maxItems": 16,
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 32,
+								"pattern": "^[a-z0-9][a-z0-9._-]*$"
+							},
+							"name": {
+								"type": "object",
+								"properties": {
+									"ar": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 48
+									},
+									"en": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 48
+									}
+								},
+								"required": [
+									"ar",
+									"en"
+								]
+							}
+						},
+						"required": [
+							"id",
+							"name"
+						]
+					}
+				},
+				"guides": {
+					"default": [],
+					"maxItems": 64,
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 64,
+								"pattern": "^[a-z0-9][a-z0-9-]*$"
+							},
+							"title": {
+								"type": "object",
+								"properties": {
+									"ar": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 120
+									},
+									"en": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 120
+									}
+								},
+								"required": [
+									"ar",
+									"en"
+								]
+							},
+							"summary": {
+								"type": "object",
+								"properties": {
+									"ar": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 300
+									},
+									"en": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 300
+									}
+								},
+								"required": [
+									"ar",
+									"en"
+								]
+							},
+							"tags": {
+								"default": [],
+								"maxItems": 8,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 32,
+									"pattern": "^[a-z0-9][a-z0-9._-]*$"
+								}
+							},
+							"surfaces": {
+								"default": [],
+								"maxItems": 8,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"overview",
+										"console",
+										"files",
+										"backups",
+										"panel"
+									]
+								}
+							},
+							"video": {
+								"type": "string",
+								"pattern": "^[A-Za-z0-9_-]{11}$"
+							},
+							"bodyPath": {
+								"type": "object",
+								"properties": {
+									"ar": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 256,
+										"pattern": "^[a-zA-Z0-9][a-zA-Z0-9/_-]*\\.md$"
+									},
+									"en": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 256,
+										"pattern": "^[a-zA-Z0-9][a-zA-Z0-9/_-]*\\.md$"
+									}
+								},
+								"required": [
+									"ar",
+									"en"
+								]
+							}
+						},
+						"required": [
+							"id",
+							"title",
+							"summary",
+							"bodyPath"
+						]
+					}
+				},
+				"backup": {
+					"default": {},
+					"type": "object",
+					"properties": {
+						"only": {
+							"default": [],
+							"description": "When set, only these paths are archived. Empty means the whole game directory.",
+							"maxItems": 32,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 256,
+								"pattern": "^[^/\\\\][^\\\\]*$"
+							}
+						},
+						"except": {
+							"default": [],
+							"description": "Paths excluded from the archive, applied after only.",
+							"maxItems": 64,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 256,
+								"pattern": "^[^/\\\\][^\\\\]*$"
+							}
+						}
+					}
+				},
+				"reset": {
+					"default": {},
+					"type": "object",
+					"properties": {
+						"keep": {
+							"default": [],
+							"description": "Paths that survive a server reset. Everything else is deleted.",
+							"maxItems": 32,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 256,
+								"pattern": "^[^/\\\\][^\\\\]*$"
+							}
+						}
+					}
+				},
+				"secrets": {
+					"default": [],
+					"maxItems": 16,
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"key": {
+								"type": "string",
+								"minLength": 2,
+								"maxLength": 32,
+								"pattern": "^[A-Z][A-Z0-9_]*$"
+							},
+							"description": {
+								"type": "object",
+								"properties": {
+									"ar": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 300
+									},
+									"en": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 300
+									}
+								},
+								"required": [
+									"ar",
+									"en"
+								]
+							},
+							"required": {
+								"default": true,
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"key",
+							"description"
+						]
+					}
+				},
+				"files": {
+					"default": {},
+					"type": "object",
+					"properties": {
+						"protected": {
+							"default": [],
+							"description": "Paths the player cannot edit, rename or delete from the file manager.",
+							"maxItems": 64,
+							"type": "array",
+							"items": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 256,
+								"pattern": "^[^/\\\\][^\\\\]*$"
+							}
+						},
+						"notable": {
+							"default": [],
+							"description": "Paths the file manager annotates with a label, note and icon.",
+							"maxItems": 32,
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"match": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 256,
+										"pattern": "^[^/\\\\][^\\\\]*$"
+									},
+									"label": {
+										"type": "object",
+										"properties": {
+											"ar": {
+												"type": "string",
+												"minLength": 1,
+												"maxLength": 48
+											},
+											"en": {
+												"type": "string",
+												"minLength": 1,
+												"maxLength": 48
+											}
+										},
+										"required": [
+											"ar",
+											"en"
+										]
+									},
+									"note": {
+										"type": "object",
+										"properties": {
+											"ar": {
+												"type": "string",
+												"minLength": 1,
+												"maxLength": 400
+											},
+											"en": {
+												"type": "string",
+												"minLength": 1,
+												"maxLength": 400
+											}
+										},
+										"required": [
+											"ar",
+											"en"
+										]
+									},
+									"icon": {
+										"type": "string",
+										"enum": [
+											"box",
+											"chart",
+											"command",
+											"download",
+											"gamepad",
+											"globe",
+											"map",
+											"puzzle",
+											"rocket",
+											"settings",
+											"shield",
+											"sword",
+											"tag",
+											"users",
+											"wrench"
+										]
+									},
+									"color": {
+										"type": "string",
+										"format": "hexColor",
+										"pattern": "^#[0-9a-fA-F]{6}$"
+									},
+									"restart": {
+										"default": false,
+										"description": "Whether editing this path needs a server restart to take effect.",
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"match",
+									"label",
+									"note"
+								]
+							}
+						}
+					}
+				},
+				"presence": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"default": "player",
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 64,
+							"pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+						},
+						"id": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 64,
+							"pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+						},
+						"avatar": {
+							"type": "string",
+							"maxLength": 300,
+							"pattern": "^https:\\/\\/"
+						},
+						"fields": {
+							"default": [],
+							"maxItems": 6,
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"key": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 64,
+										"pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+									},
+									"label": {
+										"type": "object",
+										"properties": {
+											"ar": {
+												"type": "string",
+												"minLength": 1,
+												"maxLength": 32
+											},
+											"en": {
+												"type": "string",
+												"minLength": 1,
+												"maxLength": 32
+											}
+										},
+										"required": [
+											"ar",
+											"en"
+										]
+									},
+									"inline": {
+										"default": true,
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"key",
+									"label"
+								]
+							}
+						}
+					}
+				}
+			},
+			"required": [
+				"schemaVersion",
+				"kind",
+				"metadata",
+				"resources",
+				"container"
+			]
+		},
+		{
+			"type": "object",
+			"properties": {
+				"schemaVersion": {
+					"type": "string",
+					"const": "serverk.gg/v1"
+				},
+				"kind": {
+					"type": "string",
+					"const": "GuidePackage"
+				},
+				"metadata": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 64,
+							"pattern": "^[a-z0-9][a-z0-9-]*$"
+						}
+					},
+					"required": [
+						"id"
+					]
+				},
+				"guideTags": {
+					"default": [],
+					"maxItems": 16,
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 32,
+								"pattern": "^[a-z0-9][a-z0-9._-]*$"
+							},
+							"name": {
+								"type": "object",
+								"properties": {
+									"ar": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 48
+									},
+									"en": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 48
+									}
+								},
+								"required": [
+									"ar",
+									"en"
+								]
+							}
+						},
+						"required": [
+							"id",
+							"name"
+						]
+					}
+				},
+				"guides": {
+					"minItems": 1,
+					"maxItems": 64,
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 64,
+								"pattern": "^[a-z0-9][a-z0-9-]*$"
+							},
+							"title": {
+								"type": "object",
+								"properties": {
+									"ar": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 120
+									},
+									"en": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 120
+									}
+								},
+								"required": [
+									"ar",
+									"en"
+								]
+							},
+							"summary": {
+								"type": "object",
+								"properties": {
+									"ar": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 300
+									},
+									"en": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 300
+									}
+								},
+								"required": [
+									"ar",
+									"en"
+								]
+							},
+							"tags": {
+								"default": [],
+								"maxItems": 8,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 32,
+									"pattern": "^[a-z0-9][a-z0-9._-]*$"
+								}
+							},
+							"surfaces": {
+								"default": [],
+								"maxItems": 8,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"overview",
+										"console",
+										"files",
+										"backups",
+										"panel"
+									]
+								}
+							},
+							"video": {
+								"type": "string",
+								"pattern": "^[A-Za-z0-9_-]{11}$"
+							},
+							"bodyPath": {
+								"type": "object",
+								"properties": {
+									"ar": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 256,
+										"pattern": "^[a-zA-Z0-9][a-zA-Z0-9/_-]*\\.md$"
+									},
+									"en": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 256,
+										"pattern": "^[a-zA-Z0-9][a-zA-Z0-9/_-]*\\.md$"
+									}
+								},
+								"required": [
+									"ar",
+									"en"
+								]
+							}
+						},
+						"required": [
+							"id",
+							"title",
+							"summary",
+							"bodyPath"
+						]
+					}
+				}
+			},
+			"required": [
+				"schemaVersion",
+				"kind",
+				"metadata",
+				"guides"
+			]
+		}
+	]
+}
