@@ -36,6 +36,54 @@ export const SEED_MIN = 1;
 
 export const SEED_MAX = 2_147_483_647;
 
+export const HOSTNAME_FIELD = "hostname";
+
+export const DESCRIPTION_FIELD = "description";
+
+export const MAX_PLAYERS_FIELD = "maxplayers";
+
+export const WORLD_SIZE_FIELD = "worldsize";
+
+export const SEED_FIELD = "seed";
+
+export const SAVE_INTERVAL_FIELD = "saveinterval";
+
+export const PVE_FIELD = "pve";
+
+export const SETTING_FIELDS: Record<string, string> = {
+	[HOSTNAME_FIELD]: HOSTNAME_KEY,
+	[DESCRIPTION_FIELD]: DESCRIPTION_KEY,
+	[MAX_PLAYERS_FIELD]: MAX_PLAYERS_KEY,
+	[WORLD_SIZE_FIELD]: WORLD_SIZE_KEY,
+	[SEED_FIELD]: SEED_KEY,
+	[SAVE_INTERVAL_FIELD]: SAVE_INTERVAL_KEY,
+	[PVE_FIELD]: PVE_KEY,
+};
+
+export const fieldValues = (settings: Bridge.Values): Bridge.Values => {
+	const values: Bridge.Values = {};
+
+	for (const [field, key] of Object.entries(SETTING_FIELDS)) {
+		values[field] = settings[key] ?? null;
+	}
+
+	return values;
+};
+
+export const convarValues = (values: Bridge.Values): Bridge.Values => {
+	const settings: Bridge.Values = {};
+
+	for (const [field, value] of Object.entries(values)) {
+		const key = SETTING_FIELDS[field];
+
+		if (key !== undefined) {
+			settings[key] = value;
+		}
+	}
+
+	return settings;
+};
+
 export const SETTING_DEFAULTS: Bridge.Values = {
 	[HOSTNAME_KEY]: "Serverk Rust",
 	[DESCRIPTION_KEY]: "Powered by serverk.gg",
@@ -58,7 +106,11 @@ export const clamp = (value: number, min: number, max: number) => {
 };
 
 export const numberOf = (value: Bridge.Value, fallback: number, min: number, max: number) => {
-	const parsed = typeof value === "boolean" ? Number.NaN : Number(value);
+	if (value === null || typeof value === "boolean" || String(value).trim().length === 0) {
+		return fallback;
+	}
+
+	const parsed = Number(value);
 
 	return Number.isFinite(parsed) ? clamp(parsed, min, max) : fallback;
 };

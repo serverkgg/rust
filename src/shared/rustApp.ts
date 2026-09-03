@@ -4,6 +4,12 @@ export const STEAM_APP_ID = "258550";
 
 export const SERVER_BINARY = "RustDedicated";
 
+export const GAME_ROOTS = [
+	SERVER_BINARY,
+	"RustDedicated_Data",
+	"Bundles",
+];
+
 export const SERVER_IDENTITY = "serverk";
 
 export const IDENTITY_DIRECTORY = `server/${SERVER_IDENTITY}`;
@@ -17,7 +23,13 @@ export const APP_MANIFEST = `steamapps/appmanifest_${STEAM_APP_ID}.acf`;
 export const SERVER_READY = /Server startup complete/;
 
 export const isGameInstalled = async (context: Bridge.Context) => {
-	return await context.files.exists(SERVER_BINARY);
+	for (const path of GAME_ROOTS) {
+		if (!(await context.files.exists(path))) {
+			return false;
+		}
+	}
+
+	return true;
 };
 
 const BUILD_ID = /"buildid"\s+"(?<buildId>\d+)"/;

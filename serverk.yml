@@ -64,9 +64,15 @@ backup:
 
 reset:
   keep:
-    - RustDedicated*
-    - "*.so"
+    - Bundles
+    - RustDedicated
+    - RustDedicated_Data
+    - Steam
+    - cfg
+    - runds.sh
+    - steam_appid.txt
     - steamapps
+    - "*.so*"
     - .steamcmd
     - .steam
 
@@ -84,6 +90,7 @@ files:
     - .steamcmd
     - .steam
     - steamapps
+    - Bundles
     - RustDedicated
     - RustDedicated_Data
     - .serverk-install.json

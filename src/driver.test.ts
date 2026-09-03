@@ -2,7 +2,15 @@ import { describe, expect, test } from "bun:test";
 import { BridgeLayout } from "@serverkgg/bridge";
 import { isBridgeEventName } from "@serverkgg/bridge/protocol";
 import { driver } from "./driver";
-import { parsePlayerList, RCON_PORT, SERVER_CFG, SERVER_IDENTITY, STAMP_FILE, WIPE_MARKER } from "./shared";
+import {
+	parsePlayerList,
+	RCON_PORT,
+	SERVER_CFG,
+	SERVER_IDENTITY,
+	SETTING_FIELDS,
+	STAMP_FILE,
+	WIPE_MARKER,
+} from "./shared";
 
 interface Manifest {
 	container: {
@@ -184,5 +192,39 @@ describe("the manifest guarding the files the driver depends on", () => {
 	test("backs up the identity directory the settings and the save live in", () => {
 		expect(manifest.backup.only).toContain(`server/**`);
 		expect(SERVER_CFG.startsWith(`server/${SERVER_IDENTITY}/`)).toBe(true);
+	});
+});
+
+const PANEL_KEY_PATTERN = /^[A-Za-z][A-Za-z0-9_-]*$/;
+
+const fieldKeys = sections.flatMap((section) => {
+	const own = section.layout === BridgeLayout.Form ? section.fields : [];
+	const actions = "actions" in section ? (section.actions ?? []) : [];
+
+	return [
+		...own,
+		...actions.flatMap((action) => action.fields ?? []),
+	].map((field) => field.key);
+});
+
+describe("keeping every panel key inside what the wire protocol accepts", () => {
+	test("names no field with a character the agent's manifest schema rejects", () => {
+		for (const key of fieldKeys) {
+			expect(key).toMatch(PANEL_KEY_PATTERN);
+		}
+	});
+
+	test("names no table column the wire would reject either", () => {
+		for (const table of tables) {
+			for (const column of table.columns) {
+				expect(column.key).toMatch(PANEL_KEY_PATTERN);
+			}
+		}
+	});
+
+	test("declares a field for every settings key the driver maps", () => {
+		for (const field of Object.keys(SETTING_FIELDS)) {
+			expect(fieldKeys).toContain(field);
+		}
 	});
 });

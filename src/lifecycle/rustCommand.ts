@@ -19,8 +19,6 @@ export const startCommand = (input: RustCommandInput): string[] => {
 		`./${SERVER_BINARY}`,
 		"-batchmode",
 		"-nographics",
-		"-logfile",
-		"/dev/stdout",
 		"+server.ip",
 		"0.0.0.0",
 		"+server.port",
@@ -55,5 +53,6 @@ export const startCommand = (input: RustCommandInput): string[] => {
 		input.rconPassword,
 		"+rcon.web",
 		"1",
+		"-logfile",
 	];
 };

@@ -8,21 +8,21 @@ import {
 } from "@serverkgg/bridge";
 import {
 	ANNOUNCE_MESSAGE_LENGTH,
-	DESCRIPTION_KEY,
+	DESCRIPTION_FIELD,
 	DESCRIPTION_LENGTH,
-	HOSTNAME_KEY,
+	HOSTNAME_FIELD,
 	HOSTNAME_LENGTH,
-	MAX_PLAYERS_KEY,
+	MAX_PLAYERS_FIELD,
 	MAX_PLAYERS_MAX,
 	MAX_PLAYERS_MIN,
-	PVE_KEY,
-	SAVE_INTERVAL_KEY,
+	PVE_FIELD,
+	SAVE_INTERVAL_FIELD,
 	SAVE_INTERVAL_MAX,
 	SAVE_INTERVAL_MIN,
-	SEED_KEY,
+	SEED_FIELD,
 	SEED_MAX,
 	SEED_MIN,
-	WORLD_SIZE_KEY,
+	WORLD_SIZE_FIELD,
 	WORLD_SIZE_MAX,
 	WORLD_SIZE_MIN,
 } from "../shared";
@@ -48,7 +48,7 @@ const settingsTab: Bridge.Tab = {
 			restartHint: true,
 			fields: [
 				{
-					key: HOSTNAME_KEY,
+					key: HOSTNAME_FIELD,
 					control: BridgeControl.Text,
 					label: {
 						ar: "اسم السيرفر",
@@ -61,7 +61,7 @@ const settingsTab: Bridge.Tab = {
 					maxLength: HOSTNAME_LENGTH,
 				},
 				{
-					key: DESCRIPTION_KEY,
+					key: DESCRIPTION_FIELD,
 					control: BridgeControl.Text,
 					label: {
 						ar: "وصف السيرفر",
@@ -74,7 +74,7 @@ const settingsTab: Bridge.Tab = {
 					maxLength: DESCRIPTION_LENGTH,
 				},
 				{
-					key: MAX_PLAYERS_KEY,
+					key: MAX_PLAYERS_FIELD,
 					control: BridgeControl.Number,
 					label: {
 						ar: "أقصى عدد لاعبين",
@@ -88,7 +88,7 @@ const settingsTab: Bridge.Tab = {
 					max: MAX_PLAYERS_MAX,
 				},
 				{
-					key: WORLD_SIZE_KEY,
+					key: WORLD_SIZE_FIELD,
 					control: BridgeControl.Number,
 					label: {
 						ar: "حجم الماب",
@@ -104,7 +104,7 @@ const settingsTab: Bridge.Tab = {
 					step: 500,
 				},
 				{
-					key: SEED_KEY,
+					key: SEED_FIELD,
 					control: BridgeControl.Number,
 					label: {
 						ar: "سيد الماب",
@@ -119,7 +119,7 @@ const settingsTab: Bridge.Tab = {
 					max: SEED_MAX,
 				},
 				{
-					key: PVE_KEY,
+					key: PVE_FIELD,
 					control: BridgeControl.Boolean,
 					label: {
 						ar: "وضع PvE",
@@ -131,7 +131,7 @@ const settingsTab: Bridge.Tab = {
 					},
 				},
 				{
-					key: SAVE_INTERVAL_KEY,
+					key: SAVE_INTERVAL_FIELD,
 					control: BridgeControl.Number,
 					label: {
 						ar: "كل كم يحفظ (بالثواني)",

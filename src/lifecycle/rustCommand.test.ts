@@ -38,8 +38,11 @@ describe("building the command that starts rust", () => {
 		expect(argv).toContain("-nographics");
 	});
 
-	test("sends the log to stdout, which is the only place the panel console reads", () => {
-		expect(flagValue(command(), "-logfile")).toBe("/dev/stdout");
+	test("takes no log file, so unity writes to stdout where the panel console reads", () => {
+		const argv = command();
+
+		expect(argv).toContain("-logfile");
+		expect(argv.at(-1)).toBe("-logfile");
 	});
 
 	test("listens on every interface, on the ports the manifest allocated", () => {

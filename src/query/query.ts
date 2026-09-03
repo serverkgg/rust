@@ -3,6 +3,11 @@ import { playerRoster, type RustRosterEntry, serverSample } from "../shared";
 
 const REFRESH_SECONDS = 20;
 
+const UNKNOWN: Bridge.Sample = {
+	online: null,
+	max: null,
+};
+
 const online = new Map<string, RustRosterEntry>();
 
 const presenceOf = (player: RustRosterEntry): Bridge.Values => {
@@ -57,27 +62,9 @@ export const query: Bridge.Query = {
 		await syncSessions(context);
 
 		try {
-			const sample = await serverSample(context);
-
-			if (sample.online !== null) {
-				return sample;
-			}
+			return await serverSample(context);
 		} catch {
-			context.log.warn("rcon did not answer the player count, falling back to the query port");
-		}
-
-		try {
-			const info = await context.probe.a2s(context.port("query"));
-
-			return {
-				online: info.players.online,
-				max: info.players.max,
-			};
-		} catch {
-			return {
-				online: null,
-				max: null,
-			};
+			return UNKNOWN;
 		}
 	},
 };

@@ -110,8 +110,9 @@ describe("the manifest guarding the steam install against a reset", () => {
 
 	test("keeps the game files a reset has no reason to remove", () => {
 		for (const path of [
-			"RustDedicated*",
-			"*.so",
+			"RustDedicated",
+			"RustDedicated_Data",
+			"Bundles",
 			"steamapps",
 		]) {
 			expect(manifest.reset.keep).toContain(path);
