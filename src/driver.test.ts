@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { BridgeLayout } from "@serverkgg/bridge";
+import { BridgeLayout, BridgeSetupStepKind } from "@serverkgg/bridge";
+import { GuideOpenTab } from "@serverkgg/bridge/guides";
 import { isBridgeEventName } from "@serverkgg/bridge/protocol";
 import { driver } from "./driver";
 import {
@@ -226,5 +227,76 @@ describe("keeping every panel key inside what the wire protocol accepts", () => 
 		for (const field of Object.keys(SETTING_FIELDS)) {
 			expect(fieldKeys).toContain(field);
 		}
+	});
+});
+
+const steps = driver.setup?.steps ?? [];
+
+const formSection = (tabId: string, sectionId: string) => {
+	const tab = (driver.panel?.tabs ?? []).find((entry) => entry.id === tabId);
+	const section = tab?.sections.find((entry) => entry.id === sectionId);
+
+	return section?.layout === BridgeLayout.Form ? section : null;
+};
+
+describe("walking the customer through the first run", () => {
+	test("settles the map before the name, because the map is the choice that cannot be undone", () => {
+		expect(steps.map((step) => step.id)).toEqual([
+			"world",
+			"name",
+			"invite",
+		]);
+	});
+
+	test("blocks nothing, because a fresh rust server already runs", () => {
+		expect(steps.filter((step) => step.required !== false)).toEqual([]);
+	});
+
+	test("needs no driver step, so the setup declares no submit", () => {
+		expect(steps.filter((step) => step.kind === BridgeSetupStepKind.Driver)).toEqual([]);
+		expect(driver.setup?.submit).toBeUndefined();
+	});
+
+	test("points every form step at a form section the panel really declares", () => {
+		for (const step of steps) {
+			if (step.kind !== BridgeSetupStepKind.Form) {
+				continue;
+			}
+
+			expect(formSection(step.tab, step.section)).not.toBeNull();
+		}
+	});
+
+	test("names only fields that section really carries", () => {
+		for (const step of steps) {
+			if (step.kind !== BridgeSetupStepKind.Form) {
+				continue;
+			}
+
+			const keys = (formSection(step.tab, step.section)?.fields ?? []).map((field) => field.key);
+
+			for (const key of step.fields ?? []) {
+				expect(keys).toContain(key);
+			}
+		}
+	});
+
+	test("sends the invite step to the access page, where the address lives", () => {
+		const invite = steps.find((step) => step.id === "invite");
+
+		expect(invite?.kind === BridgeSetupStepKind.Open && invite.target.tab).toBe(GuideOpenTab.Access);
+	});
+
+	test("titles and explains every step in both arabic and english", () => {
+		for (const step of steps) {
+			expect(step.title.ar.length).toBeGreaterThan(0);
+			expect(step.title.en.length).toBeGreaterThan(0);
+			expect(step.help?.ar.length).toBeGreaterThan(0);
+			expect(step.help?.en.length).toBeGreaterThan(0);
+		}
+	});
+
+	test("keeps the setup singleton out of the panel modules, because its id is reserved", () => {
+		expect(Object.keys(driver.modules ?? {})).not.toContain("setup");
 	});
 });

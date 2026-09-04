@@ -158,6 +158,7 @@ guides:
       - start
     surfaces:
       - overview
+      - setup
     bodyPath:
       ar: guides/getting-started/ar.md
       en: guides/getting-started/en.md

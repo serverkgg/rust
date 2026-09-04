@@ -9,6 +9,7 @@ import { lifecycle } from "./lifecycle";
 import { panel } from "./panel";
 import { query } from "./query";
 import { settings } from "./settings";
+import { setup } from "./setup";
 import { terminal } from "./terminal";
 
 export const driver: BridgeDriver = {
@@ -18,6 +19,7 @@ export const driver: BridgeDriver = {
 	query,
 	backup,
 	announce,
+	setup,
 	terminal,
 	panel,
 	modules: {
