@@ -1,23 +1,28 @@
 import { type Bridge, BridgeKind } from "@serverkgg/bridge";
-import {
-	generatePassword,
-	installedBuildId,
-	isGameInstalled,
-	readStamp,
-	SERVER_BINARY,
-	STEAM_APP_ID,
-	writeStamp,
-} from "../shared";
+import { writeStamp } from "@serverkgg/bridge/install";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
+import { createSteamcmd, installedBuildId, missingGameRoots } from "@serverkgg/bridge/steam";
+import { generateToken } from "@serverkgg/bridge/utils";
+import { GAME_ROOTS, type InstallStamp, RCON_PASSWORD_LENGTH, readInstallStamp, STEAM_APP_ID } from "../shared";
 import { seedConfig } from "./seedConfig";
-import { linkSteamClient, prepareSteamcmd, updateGame } from "./steamcmd";
+
+const LABEL = "rust";
+
+const steamcmdOf = (context: Bridge.Context) => {
+	return createSteamcmd(context, {
+		appId: STEAM_APP_ID,
+		label: LABEL,
+	});
+};
 
 export const install: Bridge.Install = {
 	kind: BridgeKind.Install,
 	async run(context) {
-		const stamp = await readStamp(context);
-		const fresh = !(await isGameInstalled(context));
+		const stamp = await readInstallStamp(context);
+		const fresh = (await missingGameRoots(context, GAME_ROOTS)).length > 0;
+		const steamcmd = steamcmdOf(context);
 
-		await prepareSteamcmd(context);
+		await steamcmd.prepare();
 
 		context.log(
 			fresh ? "downloading the rust dedicated server, this one is a big one" : "checking steam for a newer build",
@@ -26,27 +31,36 @@ export const install: Bridge.Install = {
 			},
 		);
 
-		await updateGame(context, fresh);
+		await steamcmd.update({
+			validate: fresh,
+		});
 
-		if (!(await isGameInstalled(context))) {
-			throw new Error(`steamcmd finished but ${SERVER_BINARY} is missing`);
+		const missing = await missingGameRoots(context, GAME_ROOTS);
+
+		if (missing.length > 0) {
+			throw new Error(`steamcmd finished but ${missing.join(", ")} is missing`);
 		}
 
-		await linkSteamClient(context);
+		await steamcmd.linkSteamClient();
 		await seedConfig(context);
 
-		const buildId = await installedBuildId(context);
+		const buildId = await steamcmd.buildId();
 
-		if (buildId !== null && stamp?.buildId !== null && stamp?.buildId !== undefined && stamp.buildId !== buildId) {
+		if (buildId !== null && stamp?.buildId != null && stamp.buildId !== buildId) {
 			context.log("the server updated to a newer steam build", {
+				from: stamp.buildId,
+				to: buildId,
+			});
+
+			context.emit(BridgeEventName.ServerUpdated, {
 				from: stamp.buildId,
 				to: buildId,
 			});
 		}
 
-		await writeStamp(context, {
+		await writeStamp<InstallStamp>(context, {
 			buildId,
-			rconPassword: stamp?.rconPassword ?? generatePassword(),
+			rconPassword: stamp?.rconPassword ?? generateToken(RCON_PASSWORD_LENGTH),
 		});
 
 		context.log("install complete", {
@@ -55,10 +69,10 @@ export const install: Bridge.Install = {
 		});
 	},
 	async describe(context) {
-		const stamp = await readStamp(context);
+		const stamp = await readInstallStamp(context);
 
 		return {
-			version: stamp?.buildId ?? (await installedBuildId(context)),
+			version: stamp?.buildId ?? (await installedBuildId(context, STEAM_APP_ID)),
 			variant: null,
 			build: null,
 		};

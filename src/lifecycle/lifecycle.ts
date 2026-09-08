@@ -1,11 +1,13 @@
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import {
 	consumeWipe,
 	generateSeed,
 	quitServer,
 	RCON_PORT,
+	readInstallStamp,
 	readSettings,
-	readStamp,
+	roster,
 	SERVER_READY,
 	saveWorld,
 	settingsOf,
@@ -21,7 +23,7 @@ export const lifecycle: Bridge.Lifecycle = {
 	async command(context) {
 		await consumeWipe(context);
 
-		const stamp = await readStamp(context);
+		const stamp = await readInstallStamp(context);
 
 		if (!stamp) {
 			throw new BridgeUserError({
@@ -39,10 +41,14 @@ export const lifecycle: Bridge.Lifecycle = {
 		});
 	},
 	async onReady(context) {
-		context.emit("ServerStarted");
+		roster.clear();
+
+		context.emit(BridgeEventName.ServerStarted);
 	},
 	async stop(context) {
-		context.emit("ServerStopping");
+		context.emit(BridgeEventName.ServerStopping);
+
+		roster.clear();
 
 		try {
 			await saveWorld(context);

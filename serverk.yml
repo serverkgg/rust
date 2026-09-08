@@ -26,10 +26,17 @@ resources:
 
 container:
   image: serverkgg/rust
+  runtime:
+    platform: linux
+    installBudgetMinutes: 30
+    bootBudgetMinutes: 12
+    shmMb: 64
+    pidsLimit: 512
   ports:
     - key: game
       containerPort: 28015
       protocol: udp
+      mirror: true
       name:
         ar: رست
         en: Rust
@@ -43,6 +50,7 @@ container:
     - key: query
       containerPort: 28017
       protocol: udp
+      mirror: true
       name:
         ar: الاستعلام
         en: Query

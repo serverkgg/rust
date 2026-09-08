@@ -1,17 +1,95 @@
 import { describe, expect, test } from "bun:test";
+import type { Bridge } from "@serverkgg/bridge";
+import { SERVER_CFG } from "./rustApp";
 import {
 	convarValues,
 	fieldValues,
 	HOSTNAME_FIELD,
 	HOSTNAME_KEY,
+	mergeSettings,
 	numberOf,
 	PVE_FIELD,
 	PVE_KEY,
+	readSettings,
 	SEED_FIELD,
 	SEED_KEY,
 	SETTING_FIELDS,
 	settingsOf,
 } from "./rustSettings";
+
+interface Merge {
+	path: string;
+	values: Bridge.Values;
+}
+
+const contextWith = (options: { stored?: Bridge.Values; reads?: string[]; merges?: Merge[] }) => {
+	return {
+		codec: {
+			sourceCfg: {
+				read: async (path: string) => {
+					options.reads?.push(path);
+
+					return options.stored ?? {};
+				},
+				merge: async (path: string, values: Bridge.Values) => {
+					options.merges?.push({
+						path,
+						values,
+					});
+				},
+			},
+		},
+	} as unknown as Bridge.Context;
+};
+
+describe("reaching server.cfg through the codec rust's config format has", () => {
+	test("reads the convars out of the identity's server.cfg", async () => {
+		const reads: string[] = [];
+
+		expect(
+			await readSettings(
+				contextWith({
+					reads,
+					stored: {
+						[HOSTNAME_KEY]: "My Server",
+					},
+				}),
+			),
+		).toEqual({
+			[HOSTNAME_KEY]: "My Server",
+		});
+
+		expect(reads).toEqual([
+			SERVER_CFG,
+		]);
+	});
+
+	test("reads a server that has never been started as no settings at all", async () => {
+		expect(await readSettings(contextWith({}))).toEqual({});
+	});
+
+	test("writes a change back into the same file, leaving the rest of it to the codec", async () => {
+		const merges: Merge[] = [];
+
+		await mergeSettings(
+			contextWith({
+				merges,
+			}),
+			{
+				[SEED_KEY]: 4242,
+			},
+		);
+
+		expect(merges).toEqual([
+			{
+				path: SERVER_CFG,
+				values: {
+					[SEED_KEY]: 4242,
+				},
+			},
+		]);
+	});
+});
 
 describe("mapping the panel's fields onto rust's convars", () => {
 	test("reads every declared field back from the convars server.cfg holds", () => {

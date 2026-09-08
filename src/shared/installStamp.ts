@@ -1,55 +1,24 @@
-import { Buffer } from "node:buffer";
 import type { Bridge } from "@serverkgg/bridge";
+import { readStamp } from "@serverkgg/bridge/install";
 
-export const STAMP_FILE = ".serverk-install.json";
-
-const PASSWORD_BYTES = 18;
+export const RCON_PASSWORD_LENGTH = 24;
 
 export interface InstallStamp {
 	buildId: string | null;
 	rconPassword: string;
 }
 
-export const generatePassword = () => {
-	const bytes = new Uint8Array(PASSWORD_BYTES);
-
-	crypto.getRandomValues(bytes);
-
-	return Buffer.from(bytes).toString("base64url");
-};
-
-export const parseStamp = (raw: string): InstallStamp | null => {
-	try {
-		const parsed: unknown = JSON.parse(raw);
-
-		if (typeof parsed !== "object" || parsed === null) {
-			return null;
-		}
-
-		const stamp = parsed as Partial<InstallStamp>;
-
-		if (typeof stamp.rconPassword !== "string" || stamp.rconPassword.length === 0) {
-			return null;
-		}
-
-		return {
-			...stamp,
-			buildId: typeof stamp.buildId === "string" ? stamp.buildId : null,
-			rconPassword: stamp.rconPassword,
-		};
-	} catch {
-		return null;
-	}
-};
-
-export const readStamp = async (context: Bridge.Context): Promise<InstallStamp | null> => {
-	if (!(await context.files.exists(STAMP_FILE))) {
+export const installStampOf = (stamp: Record<string, unknown> | null): InstallStamp | null => {
+	if (stamp === null || typeof stamp.rconPassword !== "string" || stamp.rconPassword.length === 0) {
 		return null;
 	}
 
-	return parseStamp(await context.files.read(STAMP_FILE));
+	return {
+		buildId: typeof stamp.buildId === "string" ? stamp.buildId : null,
+		rconPassword: stamp.rconPassword,
+	};
 };
 
-export const writeStamp = async (context: Bridge.Context, stamp: InstallStamp) => {
-	await context.files.write(STAMP_FILE, `${JSON.stringify(stamp, null, 2)}\n`);
+export const readInstallStamp = async (context: Bridge.Context): Promise<InstallStamp | null> => {
+	return installStampOf(await readStamp(context));
 };

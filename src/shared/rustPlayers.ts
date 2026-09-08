@@ -1,4 +1,5 @@
 import type { Bridge } from "@serverkgg/bridge";
+import { createRosterSync } from "@serverkgg/bridge/presence";
 import { rconCommand } from "./webRcon";
 
 export const PLAYER_LIST_COMMAND = "playerlist";
@@ -10,6 +11,12 @@ export type RustRosterEntry = Bridge.Row & {
 	ping: number | null;
 	connected: number | null;
 };
+
+export interface RustPresence {
+	id: string;
+	name: string;
+	ping?: number | null;
+}
 
 export interface RustSample {
 	online: number | null;
@@ -100,3 +107,28 @@ export const playerRoster = async (context: Bridge.Context) => {
 export const serverSample = async (context: Bridge.Context) => {
 	return parseServerInfo(await rconCommand(context, SERVER_INFO_COMMAND));
 };
+
+export const nameOf = (row: Bridge.Row) => {
+	return typeof row.name === "string" && row.name.length > 0 ? row.name : row.id;
+};
+
+export const pingOf = (row: Bridge.Row) => {
+	return typeof row.ping === "number" ? row.ping : null;
+};
+
+export const presenceOf = (player: RustPresence): Bridge.Values => {
+	return {
+		player: player.name,
+		steamId: player.id,
+		...(player.ping === null || player.ping === undefined
+			? {}
+			: {
+					ping: String(player.ping),
+				}),
+	};
+};
+
+export const roster = createRosterSync<RustRosterEntry>({
+	id: (player) => player.id,
+	presenceOf,
+});

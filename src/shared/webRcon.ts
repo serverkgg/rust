@@ -1,5 +1,5 @@
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
-import { readStamp } from "./installStamp";
+import { readInstallStamp } from "./installStamp";
 
 export const RCON_HOST = "127.0.0.1";
 
@@ -80,7 +80,7 @@ export const nextIdentifier = () => {
 };
 
 const rconPassword = async (context: Bridge.Context) => {
-	const stamp = await readStamp(context);
+	const stamp = await readInstallStamp(context);
 
 	if (!stamp) {
 		throw new BridgeUserError(UNREACHABLE);

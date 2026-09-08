@@ -1,4 +1,5 @@
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { rconCommand, rconFire } from "./webRcon";
 
 export const ANNOUNCE_MESSAGE_LENGTH = 200;
@@ -49,7 +50,7 @@ export const sendAnnounce = async (context: Bridge.Context, message: string) => 
 export const saveWorld = async (context: Bridge.Context) => {
 	await rconCommand(context, SAVE_COMMAND);
 
-	context.emit("WorldSaved");
+	context.emit(BridgeEventName.WorldSaved);
 };
 
 export const quitServer = async (context: Bridge.Context) => {

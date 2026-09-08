@@ -1,30 +1,43 @@
 import { describe, expect, test } from "bun:test";
 import { BridgeLayout, BridgeSetupStepKind } from "@serverkgg/bridge";
 import { GuideOpenTab } from "@serverkgg/bridge/guides";
+import { INSTALL_STAMP_FILE } from "@serverkgg/bridge/install";
 import { isBridgeEventName } from "@serverkgg/bridge/protocol";
+import { STEAM_DIRECTORY, STEAMAPPS_DIRECTORY, STEAMCMD_DIRECTORY } from "@serverkgg/bridge/steam";
 import { driver } from "./driver";
 import {
+	banCommand,
+	GAME_ROOTS,
+	nameOf,
 	parsePlayerList,
 	RCON_PORT,
 	SERVER_CFG,
 	SERVER_IDENTITY,
 	SETTING_FIELDS,
-	STAMP_FILE,
 	WIPE_MARKER,
 } from "./shared";
 
 interface Manifest {
 	container: {
+		runtime: {
+			platform: string;
+			installBudgetMinutes: number;
+			bootBudgetMinutes: number;
+		};
 		ports: {
 			key: string;
 			containerPort: number;
 			protocol: string;
+			mirror: boolean;
 			hostRange: {
 				default: number;
 				min: number;
 				max: number;
 			};
 		}[];
+	};
+	reset: {
+		keep: string[];
 	};
 	files: {
 		protected: string[];
@@ -130,6 +143,32 @@ describe("wiring the players table to the roster the collection returns", () => 
 	});
 });
 
+describe("naming the player a ban records", () => {
+	test("bans by steam id and records the name the roster carries", () => {
+		expect(
+			banCommand(
+				"76561198000000001",
+				nameOf({
+					id: "76561198000000001",
+					name: "Meslzy",
+				}),
+			),
+		).toBe('banid "76561198000000001" "Meslzy" "Banned by an admin."');
+	});
+
+	test("falls back to the steam id when the row carries no name, so the ban still reads back", () => {
+		expect(
+			banCommand(
+				"76561198000000001",
+				nameOf({
+					id: "76561198000000001",
+					name: "",
+				}),
+			),
+		).toBe('banid "76561198000000001" "76561198000000001" "Banned by an admin."');
+	});
+});
+
 describe("wiring the terminal autocomplete to the live roster", () => {
 	test("completes every argument from a module the driver actually registers", () => {
 		for (const arg of args) {
@@ -170,6 +209,12 @@ describe("the manifest and the driver agreeing on the ports", () => {
 		}
 	});
 
+	test("mirrors both ports, because rust announces the ports it bound to the steam master server", () => {
+		for (const port of manifest.container.ports) {
+			expect(port.mirror).toBe(true);
+		}
+	});
+
 	test("keeps the two host ranges apart, so one server never takes the other's port", () => {
 		const [game, query] = manifest.container.ports;
 
@@ -177,9 +222,37 @@ describe("the manifest and the driver agreeing on the ports", () => {
 	});
 });
 
+describe("declaring how the container is built and how long it is waited on", () => {
+	test("runs a linux payload, so the manifest declares no wine runtime", () => {
+		expect(manifest.container.runtime.platform).toBe("linux");
+	});
+
+	test("waits long enough for the steam download, which is the slowest thing a rust install does", () => {
+		expect(manifest.container.runtime.installBudgetMinutes).toBeGreaterThanOrEqual(
+			manifest.container.runtime.bootBudgetMinutes,
+		);
+	});
+});
+
 describe("the manifest guarding the files the driver depends on", () => {
 	test("protects the stamp the rcon password lives in", () => {
-		expect(manifest.files.protected).toContain(STAMP_FILE);
+		expect(manifest.files.protected).toContain(INSTALL_STAMP_FILE);
+	});
+
+	test("hides the steam directories from the file manager, so nobody deletes them by hand", () => {
+		expect(manifest.files.protected).toContain(STEAMCMD_DIRECTORY);
+		expect(manifest.files.protected).toContain(STEAM_DIRECTORY);
+	});
+
+	test("keeps the steam install through a reset, so a reset never re-downloads twenty gigabytes", () => {
+		for (const path of [
+			STEAMCMD_DIRECTORY,
+			STEAM_DIRECTORY,
+			STEAMAPPS_DIRECTORY,
+			...GAME_ROOTS,
+		]) {
+			expect(manifest.reset.keep).toContain(path);
+		}
 	});
 
 	test("protects the wipe marker, so nobody wipes a server by dropping a file", () => {

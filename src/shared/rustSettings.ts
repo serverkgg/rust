@@ -1,6 +1,5 @@
 import type { Bridge } from "@serverkgg/bridge";
 import { SERVER_CFG } from "./rustApp";
-import { mergeServerCfg, parseServerCfg } from "./serverCfg";
 
 export const HOSTNAME_KEY = "server.hostname";
 
@@ -158,15 +157,9 @@ export const settingsOf = (values: Bridge.Values, seed: number): RustSettings =>
 };
 
 export const readSettings = async (context: Bridge.Context): Promise<Bridge.Values> => {
-	if (!(await context.files.exists(SERVER_CFG))) {
-		return {};
-	}
-
-	return parseServerCfg(await context.files.read(SERVER_CFG));
+	return await context.codec.sourceCfg.read(SERVER_CFG);
 };
 
 export const mergeSettings = async (context: Bridge.Context, values: Bridge.Values) => {
-	const raw = (await context.files.exists(SERVER_CFG)) ? await context.files.read(SERVER_CFG) : "";
-
-	await context.files.write(SERVER_CFG, mergeServerCfg(raw, values));
+	await context.codec.sourceCfg.merge(SERVER_CFG, values);
 };
