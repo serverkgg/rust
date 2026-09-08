@@ -6,6 +6,7 @@ import {
 	BridgeIcon,
 	BridgeLayout,
 } from "@serverkgg/bridge";
+import { rconAccessSections } from "@serverkgg/bridge/rcon";
 import {
 	ANNOUNCE_MESSAGE_LENGTH,
 	DESCRIPTION_FIELD,
@@ -16,6 +17,7 @@ import {
 	MAX_PLAYERS_MAX,
 	MAX_PLAYERS_MIN,
 	PVE_FIELD,
+	RCON_PROTOCOL,
 	SAVE_INTERVAL_FIELD,
 	SAVE_INTERVAL_MAX,
 	SAVE_INTERVAL_MIN,
@@ -295,6 +297,9 @@ const controlsTab: Bridge.Tab = {
 				},
 			],
 		},
+		...rconAccessSections({
+			protocol: RCON_PROTOCOL,
+		}),
 	],
 };
 

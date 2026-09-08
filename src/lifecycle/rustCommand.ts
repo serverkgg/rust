@@ -1,4 +1,4 @@
-import { RCON_HOST, type RustSettings, SERVER_BINARY, SERVER_IDENTITY } from "../shared";
+import { type RustSettings, SERVER_BINARY, SERVER_IDENTITY } from "../shared";
 
 export const SERVER_LEVEL = "Procedural Map";
 
@@ -7,6 +7,7 @@ export const SERVER_TICKRATE = 30;
 export interface RustCommandInput {
 	gamePort: number;
 	queryPort: number;
+	rconHost: string;
 	rconPort: number;
 	rconPassword: string;
 	settings: RustSettings;
@@ -46,7 +47,7 @@ export const startCommand = (input: RustCommandInput): string[] => {
 		"+server.pve",
 		settings.pve ? "true" : "false",
 		"+rcon.ip",
-		RCON_HOST,
+		input.rconHost,
 		"+rcon.port",
 		String(input.rconPort),
 		"+rcon.password",

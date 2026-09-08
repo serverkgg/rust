@@ -1,9 +1,9 @@
 import { type Bridge, BridgeKind } from "@serverkgg/bridge";
-import { writeStamp } from "@serverkgg/bridge/install";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
+import { RCON_PASSWORD_LENGTH } from "@serverkgg/bridge/rcon";
 import { createSteamcmd, installedBuildId, missingGameRoots } from "@serverkgg/bridge/steam";
 import { generateToken } from "@serverkgg/bridge/utils";
-import { GAME_ROOTS, type InstallStamp, RCON_PASSWORD_LENGTH, readInstallStamp, STEAM_APP_ID } from "../shared";
+import { GAME_ROOTS, readInstallStamp, STEAM_APP_ID, writeInstallStamp } from "../shared";
 import { seedConfig } from "./seedConfig";
 
 const LABEL = "rust";
@@ -58,9 +58,10 @@ export const install: Bridge.Install = {
 			});
 		}
 
-		await writeStamp<InstallStamp>(context, {
+		await writeInstallStamp(context, {
 			buildId,
 			rconPassword: stamp?.rconPassword ?? generateToken(RCON_PASSWORD_LENGTH),
+			rconPasswordNext: stamp?.rconPasswordNext ?? null,
 		});
 
 		context.log("install complete", {

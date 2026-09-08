@@ -2,12 +2,15 @@ import { describe, expect, test } from "bun:test";
 import { BridgeLayout, BridgeSetupStepKind } from "@serverkgg/bridge";
 import { GuideOpenTab } from "@serverkgg/bridge/guides";
 import { INSTALL_STAMP_FILE } from "@serverkgg/bridge/install";
+import { compileGlobs, matchesAny } from "@serverkgg/bridge/manifest";
 import { isBridgeEventName } from "@serverkgg/bridge/protocol";
+import { RCON_ACCESS_MODULE, RCON_ACCESS_PORT, RCON_ACCESS_VARIABLE } from "@serverkgg/bridge/rcon";
 import { STEAM_DIRECTORY, STEAMAPPS_DIRECTORY, STEAMCMD_DIRECTORY } from "@serverkgg/bridge/steam";
 import { driver } from "./driver";
 import {
 	banCommand,
 	GAME_ROOTS,
+	IDENTITY_DIRECTORY,
 	nameOf,
 	parsePlayerList,
 	RCON_PORT,
@@ -28,12 +31,16 @@ interface Manifest {
 			key: string;
 			containerPort: number;
 			protocol: string;
-			mirror: boolean;
+			mirror?: boolean;
 			hostRange: {
 				default: number;
 				min: number;
 				max: number;
 			};
+			activeWhen?: {
+				variable: string;
+				values: string[];
+			}[];
 		}[];
 	};
 	reset: {
@@ -47,6 +54,7 @@ interface Manifest {
 	};
 	backup: {
 		only: string[];
+		except: string[];
 	};
 }
 
@@ -97,12 +105,13 @@ describe("assembling the rust driver", () => {
 		expect(driver.panel).toBeDefined();
 	});
 
-	test("registers the settings, players, live and wipes modules the tabs reference", () => {
+	test("registers the settings, players, live, wipes and remote access modules the tabs reference", () => {
 		expect(Object.keys(modules)).toEqual([
 			"settings",
 			"players",
 			"live",
 			"wipes",
+			RCON_ACCESS_MODULE,
 		]);
 	});
 
@@ -189,28 +198,54 @@ describe("wiring the terminal autocomplete to the live roster", () => {
 	});
 });
 
+const playerPorts = manifest.container.ports.filter((port) => port.key !== RCON_ACCESS_PORT);
+
+const rconPort = manifest.container.ports.find((port) => port.key === RCON_ACCESS_PORT);
+
 describe("the manifest and the driver agreeing on the ports", () => {
-	test("declares the two ports the start command reads back", () => {
+	test("declares the two player ports the start command reads back, then the remote access port", () => {
 		expect(manifest.container.ports.map((port) => port.key)).toEqual([
 			"game",
 			"query",
+			RCON_ACCESS_PORT,
 		]);
 	});
 
-	test("publishes both ports over udp, which is all rust speaks", () => {
-		for (const port of manifest.container.ports) {
+	test("publishes both player ports over udp, which is all rust speaks to players", () => {
+		for (const port of playerPorts) {
 			expect(port.protocol).toBe("udp");
 		}
 	});
 
-	test("never publishes the rcon port, because the driver reaches it over loopback", () => {
-		for (const port of manifest.container.ports) {
-			expect(port.containerPort).not.toBe(RCON_PORT);
-		}
+	test("publishes the rcon port the driver binds, over tcp, only while the panel toggle is on", () => {
+		expect(rconPort?.containerPort).toBe(RCON_PORT);
+		expect(rconPort?.protocol).toBe("tcp");
+		expect(rconPort?.activeWhen).toEqual([
+			{
+				variable: RCON_ACCESS_VARIABLE,
+				values: [
+					"true",
+				],
+			},
+		]);
 	});
 
-	test("mirrors both ports, because rust announces the ports it bound to the steam master server", () => {
-		for (const port of manifest.container.ports) {
+	test("never mirrors the rcon port, because the driver always dials the container port", () => {
+		expect(rconPort?.mirror ?? false).toBe(false);
+	});
+
+	test("declares every tcp container port once, so the rcon port collides with nothing", () => {
+		const tcp = manifest.container.ports.filter((port) => port.protocol === "tcp").map((port) => port.containerPort);
+
+		expect(new Set(tcp).size).toBe(tcp.length);
+	});
+
+	test("declares the remote access toggle in a form, which is what validate demands of activeWhen", () => {
+		expect(fieldKeys).toContain(RCON_ACCESS_VARIABLE);
+	});
+
+	test("mirrors both player ports, because rust announces the ports it bound to the steam master server", () => {
+		for (const port of playerPorts) {
 			expect(port.mirror).toBe(true);
 		}
 	});
@@ -266,6 +301,15 @@ describe("the manifest guarding the files the driver depends on", () => {
 	test("backs up the identity directory the settings and the save live in", () => {
 		expect(manifest.backup.only).toContain(`server/**`);
 		expect(SERVER_CFG.startsWith(`server/${SERVER_IDENTITY}/`)).toBe(true);
+	});
+
+	test("archives neither the map nor its occlusion cache, because both rebuild from the seed", () => {
+		const excluded = (path: string) => matchesAny(path, compileGlobs(manifest.backup.except));
+
+		expect(excluded(`${IDENTITY_DIRECTORY}/proceduralmap.3000.4242.221.map`)).toBe(true);
+		expect(excluded(`${IDENTITY_DIRECTORY}/proceduralmap.3000.4242.221.288_occlusion_3.dat`)).toBe(true);
+		expect(excluded(`${IDENTITY_DIRECTORY}/proceduralmap.3000.4242.221.sav`)).toBe(false);
+		expect(excluded(SERVER_CFG)).toBe(false);
 	});
 });
 

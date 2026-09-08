@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { ANY_HOST, LOOPBACK_HOST } from "@serverkgg/bridge/rcon";
 import { RCON_HOST, type RustSettings, SERVER_IDENTITY } from "../shared";
 import { startCommand } from "./rustCommand";
 
@@ -12,10 +13,11 @@ const settings: RustSettings = {
 	pve: false,
 };
 
-const command = (overrides: Partial<RustSettings> = {}) => {
+const command = (overrides: Partial<RustSettings> = {}, rconHost: string = LOOPBACK_HOST) => {
 	return startCommand({
 		gamePort: 28_015,
 		queryPort: 28_017,
+		rconHost,
 		rconPort: 28_016,
 		rconPassword: "s3cret",
 		settings: {
@@ -57,6 +59,7 @@ describe("building the command that starts rust", () => {
 		const argv = startCommand({
 			gamePort: 28_061,
 			queryPort: 28_161,
+			rconHost: LOOPBACK_HOST,
 			rconPort: 28_016,
 			rconPassword: "s3cret",
 			settings,
@@ -66,12 +69,20 @@ describe("building the command that starts rust", () => {
 		expect(flagValue(argv, "+server.queryport")).toBe("28161");
 	});
 
-	test("keeps rcon on loopback, because it is never a published port", () => {
+	test("keeps rcon on loopback while remote access is off, where only the driver reaches it", () => {
 		const argv = command();
 
-		expect(flagValue(argv, "+rcon.ip")).toBe(RCON_HOST);
+		expect(flagValue(argv, "+rcon.ip")).toBe(LOOPBACK_HOST);
 		expect(flagValue(argv, "+rcon.port")).toBe("28016");
 		expect(flagValue(argv, "+rcon.password")).toBe("s3cret");
+	});
+
+	test("binds rcon to every interface when the panel opened remote access, so the published port answers", () => {
+		expect(flagValue(command({}, ANY_HOST), "+rcon.ip")).toBe(ANY_HOST);
+	});
+
+	test("keeps the driver's own loopback address inside the hosts rcon can bind", () => {
+		expect(RCON_HOST).toBe(LOOPBACK_HOST);
 	});
 
 	test("turns on the websocket rcon the driver speaks", () => {

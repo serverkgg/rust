@@ -10,6 +10,8 @@ export enum WipeKind {
 
 const WORLD = /\.(?:map|sav)(?:\.\d+)?$/;
 
+const OCCLUSION = /_occlusion_\d+\.dat$/;
+
 const PLAYER = /\.db(?:-journal|-wal|-shm)?$/;
 
 export const parseWipeKind = (raw: string): WipeKind | null => {
@@ -24,7 +26,7 @@ export const parseWipeKind = (raw: string): WipeKind | null => {
 
 export const wipeTargets = (paths: string[], kind: WipeKind): string[] => {
 	return paths.filter((path) => {
-		if (WORLD.test(path)) {
+		if (WORLD.test(path) || OCCLUSION.test(path)) {
 			return true;
 		}
 

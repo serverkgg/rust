@@ -61,12 +61,31 @@ container:
         default: 28115
         min: 28115
         max: 28214
+    - key: rcon
+      containerPort: 28016
+      protocol: tcp
+      name:
+        ar: WebRCON
+        en: WebRCON
+      hint:
+        ar: للأدوات الخارجية بس، ما يدخل منه لاعب. يشتغل لما تفتح الوصول عن بُعد من اللوحة.
+        en: For external tools only, never for players. Live once remote access is turned on in the panel.
+      join: separate
+      hostRange:
+        default: 12500
+        min: 12500
+        max: 12599
+      activeWhen:
+        - variable: RCON_EXPOSED
+          values:
+            - "true"
 
 backup:
   only:
     - server/**
   except:
     - server/**/*.map
+    - server/**/*_occlusion_*.dat
     - server/**/*.sav.*
     - server/**/log/**
 

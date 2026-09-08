@@ -1,12 +1,15 @@
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
+import { rconBindHost } from "@serverkgg/bridge/rcon";
 import {
 	consumeWipe,
 	generateSeed,
+	promoteRconPassword,
 	quitServer,
 	RCON_PORT,
 	readInstallStamp,
 	readSettings,
+	releaseRcon,
 	roster,
 	SERVER_READY,
 	saveWorld,
@@ -32,11 +35,16 @@ export const lifecycle: Bridge.Lifecycle = {
 			});
 		}
 
+		const promoted = await promoteRconPassword(context, stamp);
+
+		releaseRcon();
+
 		return startCommand({
 			gamePort: context.port("game"),
 			queryPort: context.port("query"),
+			rconHost: rconBindHost(context),
 			rconPort: RCON_PORT,
-			rconPassword: stamp.rconPassword,
+			rconPassword: promoted.rconPassword,
 			settings: settingsOf(await readSettings(context), generateSeed()),
 		});
 	},
@@ -59,6 +67,8 @@ export const lifecycle: Bridge.Lifecycle = {
 			});
 
 			await context.command("quit");
+		} finally {
+			releaseRcon();
 		}
 	},
 };

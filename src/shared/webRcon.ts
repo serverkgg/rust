@@ -7,11 +7,16 @@ export const RCON_PORT = 28_016;
 
 export const RCON_NAME = "WebRcon";
 
-const CONNECT_TIMEOUT_MS = 8000;
+export const RCON_PROTOCOL: Bridge.Text = {
+	ar: "WebRCON",
+	en: "WebRCON",
+};
 
-const REPLY_TIMEOUT_MS = 15_000;
+export const CONNECT_TIMEOUT_MS = 8000;
 
-const FIRE_SETTLE_MS = 500;
+export const REPLY_TIMEOUT_MS = 15_000;
+
+export const FIRE_SETTLE_MS = 500;
 
 const UNREACHABLE: Bridge.Text = {
 	ar: "ما قدرنا نوصل لسيرفرك. تأكد إنه شغّال وجرّب مرة ثانية.",
@@ -89,17 +94,72 @@ const rconPassword = async (context: Bridge.Context) => {
 	return stamp.rconPassword;
 };
 
-const connect = async (context: Bridge.Context) => {
-	const socket = new WebSocket(rconUrl(await rconPassword(context)));
+interface Waiter {
+	resolve(message: string): void;
+	reject(error: Error): void;
+}
 
-	await new Promise<void>((resolve, reject) => {
+interface RconSession {
+	password: string;
+	socket: WebSocket;
+	ready: Promise<void>;
+	waiters: Map<number, Waiter>;
+}
+
+export interface WebRconOptions {
+	port?: number;
+	connectTimeoutMs?: number;
+	replyTimeoutMs?: number;
+	settleMs?: number;
+}
+
+export interface WebRcon {
+	command(context: Bridge.Context, command: string): Promise<string>;
+	fire(context: Bridge.Context, commands: string[]): Promise<void>;
+	release(): void;
+}
+
+export const createWebRcon = (options: WebRconOptions = {}): WebRcon => {
+	const port = options.port ?? RCON_PORT;
+	const connectTimeoutMs = options.connectTimeoutMs ?? CONNECT_TIMEOUT_MS;
+	const replyTimeoutMs = options.replyTimeoutMs ?? REPLY_TIMEOUT_MS;
+	const settleMs = options.settleMs ?? FIRE_SETTLE_MS;
+
+	let session: RconSession | null = null;
+
+	const drop = (target: RconSession) => {
+		if (session === target) {
+			session = null;
+		}
+
+		for (const waiter of target.waiters.values()) {
+			waiter.reject(new BridgeUserError(UNREACHABLE));
+		}
+
+		target.waiters.clear();
+		target.socket.close();
+	};
+
+	const open = (password: string): RconSession => {
+		const socket = new WebSocket(rconUrl(password, port));
+		const waiters = new Map<number, Waiter>();
+		const { promise: ready, resolve, reject } = Promise.withResolvers<void>();
+		const target: RconSession = {
+			password,
+			socket,
+			ready,
+			waiters,
+		};
+
 		const timer = setTimeout(() => {
 			reject(new BridgeUserError(UNREACHABLE));
-		}, CONNECT_TIMEOUT_MS);
+			drop(target);
+		}, connectTimeoutMs);
 
 		const fail = () => {
 			clearTimeout(timer);
 			reject(new BridgeUserError(UNREACHABLE));
+			drop(target);
 		};
 
 		socket.addEventListener(
@@ -113,71 +173,98 @@ const connect = async (context: Bridge.Context) => {
 			},
 		);
 
-		socket.addEventListener("error", fail, {
-			once: true,
+		socket.addEventListener("error", fail);
+		socket.addEventListener("close", fail);
+
+		socket.addEventListener("message", (event: MessageEvent) => {
+			const reply = decodeRconFrame(String(event.data));
+			const waiter = reply === null ? undefined : waiters.get(reply.identifier);
+
+			if (reply === null || waiter === undefined) {
+				return;
+			}
+
+			waiters.delete(reply.identifier);
+			waiter.resolve(reply.message);
 		});
 
-		socket.addEventListener("close", fail, {
-			once: true,
-		});
-	}).catch((error: unknown) => {
-		socket.close();
+		return target;
+	};
 
-		throw error;
-	});
+	const sessionFor = async (context: Bridge.Context): Promise<RconSession> => {
+		const password = await rconPassword(context);
 
-	return socket;
+		if (session !== null && session.password === password && session.socket.readyState <= WebSocket.OPEN) {
+			await session.ready;
+
+			return session;
+		}
+
+		if (session !== null) {
+			drop(session);
+		}
+
+		const target = open(password);
+
+		session = target;
+
+		await target.ready;
+
+		return target;
+	};
+
+	return {
+		async command(context, command) {
+			const target = await sessionFor(context);
+			const identifier = nextIdentifier();
+
+			return await new Promise<string>((resolve, reject) => {
+				const timer = setTimeout(() => {
+					target.waiters.delete(identifier);
+					reject(new BridgeUserError(UNREACHABLE));
+				}, replyTimeoutMs);
+
+				target.waiters.set(identifier, {
+					resolve(message) {
+						clearTimeout(timer);
+						resolve(message);
+					},
+					reject(error) {
+						clearTimeout(timer);
+						reject(error);
+					},
+				});
+
+				target.socket.send(encodeRconFrame(identifier, command));
+			});
+		},
+		async fire(context, commands) {
+			const target = await sessionFor(context);
+
+			for (const command of commands) {
+				target.socket.send(encodeRconFrame(nextIdentifier(), command));
+			}
+
+			await Bun.sleep(settleMs);
+		},
+		release() {
+			if (session !== null) {
+				drop(session);
+			}
+		},
+	};
 };
 
+const webRcon = createWebRcon();
+
 export const rconCommand = async (context: Bridge.Context, command: string) => {
-	const socket = await connect(context);
-	const identifier = nextIdentifier();
-
-	try {
-		return await new Promise<string>((resolve, reject) => {
-			const timer = setTimeout(() => {
-				reject(new BridgeUserError(UNREACHABLE));
-			}, REPLY_TIMEOUT_MS);
-
-			socket.addEventListener("message", (event: MessageEvent) => {
-				const reply = decodeRconFrame(String(event.data));
-
-				if (!reply || reply.identifier !== identifier) {
-					return;
-				}
-
-				clearTimeout(timer);
-				resolve(reply.message);
-			});
-
-			socket.addEventListener(
-				"close",
-				() => {
-					clearTimeout(timer);
-					reject(new BridgeUserError(UNREACHABLE));
-				},
-				{
-					once: true,
-				},
-			);
-
-			socket.send(encodeRconFrame(identifier, command));
-		});
-	} finally {
-		socket.close();
-	}
+	return await webRcon.command(context, command);
 };
 
 export const rconFire = async (context: Bridge.Context, commands: string[]) => {
-	const socket = await connect(context);
+	await webRcon.fire(context, commands);
+};
 
-	try {
-		for (const command of commands) {
-			socket.send(encodeRconFrame(nextIdentifier(), command));
-		}
-
-		await Bun.sleep(FIRE_SETTLE_MS);
-	} finally {
-		socket.close();
-	}
+export const releaseRcon = () => {
+	webRcon.release();
 };

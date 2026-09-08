@@ -7,7 +7,7 @@ The Rust game package for the Serverk platform (`serverk.gg`). This repo holds e
 ## Layout
 
 - `serverk.yml` — the game manifest: metadata, resources, ports, backup rules, guides.
-- `src/` — the bridge driver: install (SteamCMD), lifecycle, the WebRCON control channel, query, backup, and the panel modules.
+- `src/` — the bridge driver: install (SteamCMD), lifecycle, the WebRCON control channel, query, backup, and the panel modules. The driver keeps one WebSocket to `rcon.port` on loopback for the whole run, matching replies to commands by identifier, and drops it on stop and before every start. The same password is what the remote-access card shows: `rcon.ip` binds every interface only while the panel toggle is on, and a rotation waits in the install stamp until the next start.
 - `image/Dockerfile` — the runtime image; the compiled bridge binary is its entrypoint.
 - `assets/` — logo and banner (webp).
 - `guides/` — player guides in Arabic and English.

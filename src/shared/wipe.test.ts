@@ -10,6 +10,11 @@ const world = [
 	`${IDENTITY}/proceduralmap.3000.4242.221.sav.2`,
 ];
 
+const occlusion = [
+	`${IDENTITY}/proceduralmap.3000.90807060.288_occlusion_3.dat`,
+	`${IDENTITY}/proceduralmap.3000.1617222103.288_occlusion_3.dat`,
+];
+
 const player = [
 	`${IDENTITY}/player.blueprints.5.db`,
 	`${IDENTITY}/player.deaths.5.db`,
@@ -20,6 +25,7 @@ const player = [
 
 const listing = [
 	...world,
+	...occlusion,
 	...player,
 ];
 
@@ -47,7 +53,14 @@ describe("reading the wipe a player asked for", () => {
 
 describe("choosing what a map wipe deletes", () => {
 	test("deletes the map and every save beside it", () => {
-		expect(wipeTargets(listing, WipeKind.Map)).toEqual(world);
+		expect(wipeTargets(listing, WipeKind.Map)).toEqual([
+			...world,
+			...occlusion,
+		]);
+	});
+
+	test("deletes the occlusion cache rust leaves beside a map, including the one a dead map left behind", () => {
+		expect(wipeTargets(occlusion, WipeKind.Map)).toEqual(occlusion);
 	});
 
 	test("keeps the blueprints players unlocked", () => {
@@ -71,7 +84,7 @@ describe("choosing what a map wipe deletes", () => {
 });
 
 describe("choosing what a full wipe deletes", () => {
-	test("deletes the map, the saves and every player database", () => {
+	test("deletes the map, the occlusion cache, the saves and every player database", () => {
 		expect(wipeTargets(listing, WipeKind.Full)).toEqual(listing);
 	});
 
@@ -85,6 +98,19 @@ describe("choosing what a full wipe deletes", () => {
 				WipeKind.Full,
 			),
 		).toHaveLength(2);
+	});
+
+	test("keeps a data file that is not an occlusion cache", () => {
+		expect(
+			wipeTargets(
+				[
+					`${IDENTITY}/companion.id`,
+					`${IDENTITY}/occlusion.dat`,
+					`${IDENTITY}/proceduralmap.3000.90807060.288_occlusion.dat`,
+				],
+				WipeKind.Full,
+			),
+		).toEqual([]);
 	});
 
 	test("still keeps the config, because a wipe is not a reset", () => {
