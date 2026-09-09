@@ -8,6 +8,10 @@ export const SAVE_COMMAND = "server.save";
 
 export const QUIT_COMMAND = "quit";
 
+export const KICK_REASON = "Kicked by an admin.";
+
+export const BAN_REASON = "Banned by an admin.";
+
 const SPACING = /\s+/g;
 
 const QUOTES = /["\\]/g;
@@ -21,11 +25,15 @@ export const sayCommand = (message: string) => {
 };
 
 export const kickCommand = (steamId: string) => {
-	return `kick ${quoteArgument(steamId)} ${quoteArgument("Kicked by an admin.")}`;
+	return `kick ${quoteArgument(steamId)} ${quoteArgument(KICK_REASON)}`;
 };
 
 export const banCommand = (steamId: string, name: string) => {
-	return `banid ${quoteArgument(steamId)} ${quoteArgument(name)} ${quoteArgument("Banned by an admin.")}`;
+	return `banid ${quoteArgument(steamId)} ${quoteArgument(name)} ${quoteArgument(BAN_REASON)}`;
+};
+
+export const unbanCommand = (steamId: string) => {
+	return `unban ${quoteArgument(steamId)}`;
 };
 
 export const messageArgument = (args: Bridge.Values) => {

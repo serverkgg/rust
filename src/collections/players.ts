@@ -1,6 +1,16 @@
 import { type Bridge, BridgeKind } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
-import { banCommand, kickCommand, nameOf, pingOf, playerRoster, presenceOf, rconCommand } from "../shared";
+import {
+	avatarHashOf,
+	banCommand,
+	kickCommand,
+	levelOf,
+	nameOf,
+	pingOf,
+	playerRoster,
+	presenceOf,
+	rconCommand,
+} from "../shared";
 
 const REFRESH_SECONDS = 15;
 
@@ -8,7 +18,9 @@ const presenceOfRow = (row: Bridge.Row) => {
 	return presenceOf({
 		id: row.id,
 		name: nameOf(row),
+		level: levelOf(row),
 		ping: pingOf(row),
+		avatarHash: avatarHashOf(row),
 	});
 };
 

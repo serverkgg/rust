@@ -4,7 +4,8 @@ import { rconAccess } from "./access";
 import { live, wipes } from "./actions";
 import { announce } from "./announce";
 import { backup } from "./backup";
-import { players } from "./collections";
+import { bans, players } from "./collections";
+import { health } from "./details";
 import { events } from "./events";
 import { install } from "./install";
 import { lifecycle } from "./lifecycle";
@@ -27,8 +28,10 @@ export const driver: BridgeDriver = {
 	modules: {
 		settings,
 		players,
+		bans,
 		live,
 		wipes,
+		health,
 		[RCON_ACCESS_MODULE]: rconAccess,
 	},
 };

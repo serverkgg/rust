@@ -1,18 +1,22 @@
 import { describe, expect, test } from "bun:test";
-import { BridgeLayout, BridgeSetupStepKind } from "@serverkgg/bridge";
+import { BridgeFormTarget, BridgeLayout, BridgePlace, BridgeSetupStepKind } from "@serverkgg/bridge";
 import { GuideOpenTab } from "@serverkgg/bridge/guides";
 import { INSTALL_STAMP_FILE } from "@serverkgg/bridge/install";
 import { compileGlobs, matchesAny } from "@serverkgg/bridge/manifest";
+import type { BridgeSection } from "@serverkgg/bridge/protocol";
 import { isBridgeEventName } from "@serverkgg/bridge/protocol";
 import { RCON_ACCESS_MODULE, RCON_ACCESS_PORT, RCON_ACCESS_VARIABLE } from "@serverkgg/bridge/rcon";
 import { STEAM_DIRECTORY, STEAMAPPS_DIRECTORY, STEAMCMD_DIRECTORY } from "@serverkgg/bridge/steam";
+import { banRow } from "./collections";
 import { driver } from "./driver";
 import {
 	banCommand,
 	GAME_ROOTS,
 	IDENTITY_DIRECTORY,
 	nameOf,
+	parseBanList,
 	parsePlayerList,
+	presenceOf,
 	RCON_PORT,
 	SERVER_CFG,
 	SERVER_IDENTITY,
@@ -20,7 +24,22 @@ import {
 	WIPE_MARKER,
 } from "./shared";
 
+const placeOf = (section: BridgeSection | null | undefined) => {
+	return section && "place" in section ? section.place : undefined;
+};
+
 interface Manifest {
+	presence: {
+		id: string;
+		avatar: string;
+		fields: {
+			key: string;
+		}[];
+	};
+	secrets: {
+		key: string;
+		required: boolean;
+	}[];
 	container: {
 		runtime: {
 			platform: string;
@@ -86,12 +105,33 @@ const ROSTER_KEYS = Object.keys(
 			{
 				SteamID: "76561198000000001",
 				DisplayName: "Meslzy",
+				CurrentLevel: 34,
 				Ping: 31,
 				ConnectedSeconds: 60,
 			},
 		]),
 	).at(0) ?? {},
 );
+
+const BAN_ROW = parseBanList('0 76561198000000001 "Meslzy" "Banned by an admin." -1').at(0);
+
+const BAN_KEYS = Object.keys(BAN_ROW === undefined ? {} : banRow(BAN_ROW));
+
+const PRESENCE = presenceOf({
+	id: "76561198000000001",
+	name: "Meslzy",
+	level: 34,
+	ping: 31,
+	avatarHash: "a".repeat(40),
+});
+
+const tabOf = (id: string) => {
+	return (driver.panel?.tabs ?? []).find((tab) => tab.id === id);
+};
+
+const sectionOf = (tabId: string, sectionId: string) => {
+	return tabOf(tabId)?.sections.find((section) => section.id === sectionId);
+};
 
 describe("assembling the rust driver", () => {
 	test("declares every capability the panel and the platform depend on", () => {
@@ -105,12 +145,14 @@ describe("assembling the rust driver", () => {
 		expect(driver.panel).toBeDefined();
 	});
 
-	test("registers the settings, players, live, wipes and remote access modules the tabs reference", () => {
+	test("registers the settings, players, bans, live, wipes, health and remote access modules the tabs reference", () => {
 		expect(Object.keys(modules)).toEqual([
 			"settings",
 			"players",
+			"bans",
 			"live",
 			"wipes",
+			"health",
 			RCON_ACCESS_MODULE,
 		]);
 	});
@@ -144,9 +186,10 @@ describe("wiring the players table to the roster the collection returns", () => 
 		}
 	});
 
-	test("shows the player and the ping the panel promises", () => {
+	test("shows the player, the level and the ping the panel promises", () => {
 		expect(columnsOf("players")).toEqual([
 			"name",
+			"level",
 			"ping",
 		]);
 	});
@@ -415,5 +458,108 @@ describe("walking the customer through the first run", () => {
 
 	test("keeps the setup singleton out of the panel modules, because its id is reserved", () => {
 		expect(Object.keys(driver.modules ?? {})).not.toContain("setup");
+	});
+});
+
+describe("placing the roster and the ban list on the platform's players page", () => {
+	test("places every section of the players tab, so the tab leaves the sidebar", () => {
+		expect((tabOf("players")?.sections ?? []).map((section) => placeOf(section))).toEqual([
+			BridgePlace.Players,
+			BridgePlace.Players,
+		]);
+	});
+
+	test("keeps the players tab declared, because a guide still opens it by name", () => {
+		expect(tabOf("players")).toBeDefined();
+	});
+
+	test("titles the roster tab the way every other game does", () => {
+		expect(tabOf("players")?.title).toEqual({
+			ar: "اللاعبين",
+			en: "Players",
+		});
+	});
+
+	test("offers the ban on a player who is no longer connected, and the kick only while they are", () => {
+		const online = sectionOf("players", "online");
+		const actions = online !== undefined && "actions" in online ? (online.actions ?? []) : [];
+
+		expect(actions.find((action) => action.id === "ban")?.offline).toBe(true);
+		expect(actions.find((action) => action.id === "kick")?.offline).toBeUndefined();
+	});
+
+	test("shows only columns the ban list carries", () => {
+		for (const key of columnsOf("bans")) {
+			expect(BAN_KEYS).toContain(key);
+		}
+	});
+
+	test("shows the player, the steam id and the reason the ban was written with", () => {
+		expect(columnsOf("bans")).toEqual([
+			"name",
+			"id",
+			"reason",
+		]);
+	});
+
+	test("offers a box to ban a steam id that never joined", () => {
+		const section = sectionOf("players", "bans");
+
+		expect(section !== undefined && "add" in section ? section.add?.placeholder : undefined).toBe("7656119…");
+		expect(modules.bans !== undefined && "add" in modules.bans).toBe(true);
+	});
+});
+
+describe("placing the health card on the server overview", () => {
+	test("places the health detail on the overview, beside the platform's own live numbers", () => {
+		expect(placeOf(sectionOf("controls", "health"))).toBe(BridgePlace.Overview);
+	});
+
+	test("leads the controls tab with the health card", () => {
+		expect(tabOf("controls")?.sections.at(0)?.id).toBe("health");
+	});
+
+	test("leaves the rest of the controls tab on its own page", () => {
+		expect(
+			(tabOf("controls")?.sections ?? []).filter((section) => placeOf(section) === undefined).length,
+		).toBeGreaterThan(0);
+	});
+});
+
+describe("explaining every settings form rust declares itself", () => {
+	test("says in one sentence what the form does, in both languages", () => {
+		for (const section of sections) {
+			if (section.layout !== BridgeLayout.Form || section.target !== BridgeFormTarget.Settings) {
+				continue;
+			}
+
+			expect(section.help?.ar.length).toBeGreaterThan(0);
+			expect(section.help?.en.length).toBeGreaterThan(0);
+		}
+	});
+});
+
+describe("the manifest and the driver agreeing on the presence payload", () => {
+	test("names the id key the roster rows are keyed by", () => {
+		expect(manifest.presence.id).toBe("steamId");
+		expect(Object.keys(PRESENCE)).toContain(manifest.presence.id);
+	});
+
+	test("declares only fields the presence payload really carries", () => {
+		for (const field of manifest.presence.fields) {
+			expect(Object.keys(PRESENCE)).toContain(field.key);
+		}
+	});
+
+	test("builds the avatar url out of the hash the roster resolves", () => {
+		expect(manifest.presence.avatar).toContain("{avatarHash}");
+		expect(Object.keys(PRESENCE)).toContain("avatarHash");
+	});
+
+	test("asks for the steam key the avatars need without ever requiring it", () => {
+		const secret = manifest.secrets.find((entry) => entry.key === "STEAM_WEB_API_KEY");
+
+		expect(secret).toBeDefined();
+		expect(secret?.required).toBe(false);
 	});
 });

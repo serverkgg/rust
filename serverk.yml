@@ -89,6 +89,13 @@ backup:
     - server/**/*.sav.*
     - server/**/log/**
 
+secrets:
+  - key: STEAM_WEB_API_KEY
+    description:
+      ar: مفتاح Steam Web API للمنصة — منه نجيب صور حسابات Steam اللي تظهر في جدول اللاعبين.
+      en: The platform's Steam Web API key — it reads the Steam avatars shown in the players list.
+    required: false
+
 reset:
   keep:
     - Bundles
@@ -106,7 +113,16 @@ reset:
 presence:
   name: player
   id: steamId
+  avatar: "https://avatars.steamstatic.com/{avatarHash}_full.jpg"
   fields:
+    - key: platform
+      label:
+        ar: المنصة
+        en: Platform
+    - key: level
+      label:
+        ar: المستوى
+        en: Level
     - key: ping
       label:
         ar: البنق

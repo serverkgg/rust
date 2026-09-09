@@ -5,6 +5,7 @@ import {
 	BridgeFormTarget,
 	BridgeIcon,
 	BridgeLayout,
+	BridgePlace,
 } from "@serverkgg/bridge";
 import { rconAccessSections } from "@serverkgg/bridge/rcon";
 import {
@@ -47,6 +48,10 @@ const settingsTab: Bridge.Tab = {
 			id: "world",
 			target: BridgeFormTarget.Settings,
 			module: "settings",
+			help: {
+				ar: "هذي إعدادات سيرفرك الأساسية، وأي تعديل فيها يبي إعادة تشغيل عشان يشتغل.",
+				en: "These are your server's core settings, and every change needs a restart to take effect.",
+			},
 			restartHint: true,
 			fields: [
 				{
@@ -163,6 +168,7 @@ const playersTab: Bridge.Tab = {
 		{
 			layout: BridgeLayout.Table,
 			id: "online",
+			place: BridgePlace.Players,
 			module: "players",
 			columns: [
 				{
@@ -170,6 +176,13 @@ const playersTab: Bridge.Tab = {
 					label: {
 						ar: "اللاعب",
 						en: "Player",
+					},
+				},
+				{
+					key: "level",
+					label: {
+						ar: "المستوى",
+						en: "Level",
 					},
 				},
 				{
@@ -196,11 +209,70 @@ const playersTab: Bridge.Tab = {
 						en: "Ban",
 					},
 					confirm: BridgeConfirm.Strong,
+					offline: true,
 				},
 			],
 			empty: {
 				ar: "ما فيه أحد داخل الحين.",
 				en: "Nobody is online right now.",
+			},
+		},
+		{
+			layout: BridgeLayout.Table,
+			id: "bans",
+			title: {
+				ar: "المحظورين",
+				en: "Banned players",
+			},
+			help: {
+				ar: "كل واحد محظور من سيرفرك، ومن نفس السطر ترفع عنه الحظر.",
+				en: "Everyone banned from your server, and the same row is where you lift it.",
+			},
+			place: BridgePlace.Players,
+			module: "bans",
+			columns: [
+				{
+					key: "name",
+					label: {
+						ar: "اللاعب",
+						en: "Player",
+					},
+				},
+				{
+					key: "id",
+					label: {
+						ar: "رقم Steam",
+						en: "Steam ID",
+					},
+				},
+				{
+					key: "reason",
+					label: {
+						ar: "السبب",
+						en: "Reason",
+					},
+				},
+			],
+			add: {
+				label: {
+					ar: "احظر بالمعرّف",
+					en: "Ban by Steam ID",
+				},
+				placeholder: "7656119…",
+			},
+			actions: [
+				{
+					id: "remove",
+					label: {
+						ar: "رفع الحظر",
+						en: "Unban",
+					},
+					confirm: BridgeConfirm.Normal,
+				},
+			],
+			empty: {
+				ar: "ما فيه أحد محظور من سيرفرك. أي واحد تحظره من جدول اللاعبين بيطلع لك هنا.",
+				en: "Nobody is banned from your server. Whoever you ban from the roster lands here.",
 			},
 		},
 	],
@@ -214,6 +286,20 @@ const controlsTab: Bridge.Tab = {
 	},
 	icon: BridgeIcon.Command,
 	sections: [
+		{
+			layout: BridgeLayout.Detail,
+			id: "health",
+			title: {
+				ar: "حالة السيرفر",
+				en: "Server health",
+			},
+			place: BridgePlace.Overview,
+			module: "health",
+			empty: {
+				ar: "ما قدرنا نوصل لسيرفرك الحين. شغّله وخلّه دقيقة، وبتطلع لك الأرقام هنا.",
+				en: "We could not reach your server right now. Start it, give it a minute, and the numbers land here.",
+			},
+		},
 		{
 			layout: BridgeLayout.Actions,
 			id: "live",
