@@ -34,10 +34,6 @@ export const wipeTargets = (paths: string[], kind: WipeKind): string[] => {
 	});
 };
 
-export const requestWipe = async (context: Bridge.Context, kind: WipeKind) => {
-	await context.files.write(WIPE_MARKER, `${kind}\n`);
-};
-
 export const pendingWipe = async (context: Bridge.Context) => {
 	if (!(await context.files.exists(WIPE_MARKER))) {
 		return null;
@@ -59,7 +55,7 @@ export const applyWipe = async (context: Bridge.Context, kind: WipeKind) => {
 
 	await context.files.remove(WIPE_MARKER);
 
-	context.log("wipe applied, the server will build a new map on this start", {
+	context.log("wipe applied, the server builds a new map on its next start", {
 		kind,
 		removed: targets.length,
 	});

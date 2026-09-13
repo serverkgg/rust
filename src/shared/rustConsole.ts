@@ -61,6 +61,33 @@ export const saveWorld = async (context: Bridge.Context) => {
 	context.emit(BridgeEventName.WorldSaved);
 };
 
+export const SAVE_COMPLETE = /^\s*Saved [\d,]+ ents,/;
+
+export const SAVE_CONFIRM_TIMEOUT_MS = 30_000;
+
+export const awaitSaveComplete = async (
+	context: Bridge.Context,
+	save: () => Promise<void>,
+	timeoutMs: number = SAVE_CONFIRM_TIMEOUT_MS,
+) => {
+	const { promise: completed, resolve } = Promise.withResolvers<boolean>();
+	const unsubscribe = context.logs.follow(SAVE_COMPLETE, () => {
+		resolve(true);
+	});
+	const timer = setTimeout(() => {
+		resolve(false);
+	}, timeoutMs);
+
+	try {
+		await save();
+
+		return await completed;
+	} finally {
+		clearTimeout(timer);
+		unsubscribe();
+	}
+};
+
 export const quitServer = async (context: Bridge.Context) => {
 	await rconFire(context, [
 		QUIT_COMMAND,

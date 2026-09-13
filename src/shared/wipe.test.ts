@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { parseWipeKind, WipeKind, wipeTargets } from "./wipe";
+import type { Bridge } from "@serverkgg/bridge";
+import { compileGlobs, matchesAny } from "@serverkgg/bridge/manifest";
+import { applyWipe, consumeWipe, parseWipeKind, WIPE_MARKER, WipeKind, wipeTargets } from "./wipe";
 
 const IDENTITY = "server/serverk";
 
@@ -122,5 +124,163 @@ describe("choosing what a full wipe deletes", () => {
 				WipeKind.Full,
 			),
 		).toEqual([]);
+	});
+});
+
+const identityWith = (paths: string[]) => {
+	const stored = new Map<string, string>(
+		paths.map((path) => [
+			path,
+			"",
+		]),
+	);
+
+	const globs: string[] = [];
+
+	const context = {
+		files: {
+			async list(glob: string) {
+				globs.push(glob);
+
+				const patterns = compileGlobs([
+					glob,
+				]);
+				const files = [
+					...stored.keys(),
+				];
+				const directories = new Set(
+					files.flatMap((path) => {
+						const segments = path.split("/");
+
+						return segments.slice(1).map((_, index) => segments.slice(0, index + 1).join("/"));
+					}),
+				);
+
+				return [
+					...[
+						...directories,
+					].map((path) => {
+						return {
+							path,
+							directory: true,
+						};
+					}),
+					...files.map((path) => {
+						return {
+							path,
+							directory: false,
+						};
+					}),
+				].filter((entry) => matchesAny(entry.path, patterns));
+			},
+			async exists(path: string) {
+				return stored.has(path);
+			},
+			async read(path: string) {
+				return stored.get(path) ?? "";
+			},
+			async write(path: string, content: string) {
+				stored.set(path, content);
+			},
+			async remove(path: string) {
+				stored.delete(path);
+			},
+		},
+		log() {},
+	} as unknown as Bridge.Context;
+
+	return {
+		context,
+		globs,
+		stored,
+	};
+};
+
+describe("applying a wipe the platform runs with the server stopped", () => {
+	test("lists only the files directly inside the serverk identity", async () => {
+		const { context, globs } = identityWith(listing);
+
+		await applyWipe(context, WipeKind.Map);
+
+		expect(globs).toEqual([
+			"server/serverk/*",
+		]);
+	});
+
+	test("leaves a world outside the serverk identity and the config folder untouched", async () => {
+		const outside = [
+			"server/my_server_identity/proceduralmap.3000.4242.221.map",
+			"server/my_server_identity/player.blueprints.5.db",
+			`${IDENTITY}/cfg/server.cfg`,
+			`${IDENTITY}/cfg/proceduralmap.3000.4242.221.sav`,
+		];
+		const { context, stored } = identityWith([
+			...listing,
+			...outside,
+		]);
+
+		await applyWipe(context, WipeKind.Full);
+
+		expect([
+			...stored.keys(),
+		]).toEqual(outside);
+	});
+
+	test("clears the map and keeps the blueprints on a map wipe", async () => {
+		const { context, stored } = identityWith(listing);
+
+		await applyWipe(context, WipeKind.Map);
+
+		expect([
+			...stored.keys(),
+		]).toEqual(player);
+	});
+
+	test("clears the player databases too on a full wipe", async () => {
+		const { context, stored } = identityWith(listing);
+
+		await applyWipe(context, WipeKind.Full);
+
+		expect(stored.size).toBe(0);
+	});
+
+	test("needs no marker, because the platform already stopped the server and stored a recovery backup", async () => {
+		const { context, stored } = identityWith(world);
+
+		await applyWipe(context, WipeKind.Map);
+
+		expect(stored.has(WIPE_MARKER)).toBe(false);
+		expect(stored.size).toBe(0);
+	});
+});
+
+describe("honouring a wipe the previous release left for the next start", () => {
+	test("applies a marker a previous release wrote, then removes it", async () => {
+		const { context, stored } = identityWith(listing);
+
+		stored.set(WIPE_MARKER, "full\n");
+
+		await consumeWipe(context);
+
+		expect(stored.size).toBe(0);
+	});
+
+	test("drops a marker it cannot read without wiping anything", async () => {
+		const { context, stored } = identityWith(listing);
+
+		stored.set(WIPE_MARKER, "everything\n");
+
+		await consumeWipe(context);
+
+		expect(stored.has(WIPE_MARKER)).toBe(false);
+		expect(stored.size).toBe(listing.length);
+	});
+
+	test("starts normally when no wipe is waiting", async () => {
+		const { context, stored } = identityWith(listing);
+
+		await consumeWipe(context);
+
+		expect(stored.size).toBe(listing.length);
 	});
 });

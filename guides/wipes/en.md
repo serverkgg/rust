@@ -18,11 +18,16 @@ A wipe is not a fault or a punishment — it is what keeps a server alive. Witho
 
 The **Controls** tab has a wipe section with two buttons.
 
-1. Take a backup first — a wipe is only undone from one
-2. Pick the kind of wipe and read the confirmation
-3. We message the players who are online, stop your server, clear it, and it comes back on its own with a new map
+1. Pick the kind of wipe and read the confirmation
+2. We warn the players who are online and stop your server
+3. With the server stopped, and before anything is deleted, we take a backup ourselves, listed in your backups as "Before the content change"
+4. We clear it, and it comes back on its own with a new map only if it was running
+
+A wipe is only undone from that backup, so keep it until you are sure everything is fine.
 
 @[open](backups)
+
+> [!note] If your backup storage is full, the wipe does not start. Delete an old backup and try again.
 
 > [!danger] A wipe deletes work players put real hours into. Announce it in your Discord at least a day ahead, and be exact: which wipe, and when.
 

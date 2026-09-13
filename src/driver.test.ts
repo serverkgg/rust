@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { BridgeFormTarget, BridgeLayout, BridgePlace, BridgeSetupStepKind } from "@serverkgg/bridge";
+import { BridgeFormTarget, BridgeKind, BridgeLayout, BridgePlace, BridgeSetupStepKind } from "@serverkgg/bridge";
 import { GuideOpenTab } from "@serverkgg/bridge/guides";
 import { INSTALL_STAMP_FILE } from "@serverkgg/bridge/install";
 import { compileGlobs, matchesAny } from "@serverkgg/bridge/manifest";
@@ -507,6 +507,60 @@ describe("placing the roster and the ban list on the platform's players page", (
 
 		expect(section !== undefined && "add" in section ? section.add?.placeholder : undefined).toBe("7656119…");
 		expect(modules.bans !== undefined && "add" in modules.bans).toBe(true);
+	});
+});
+
+describe("protecting the wipes with a recovery backup", () => {
+	const wipes = modules.wipes;
+
+	test("declares both wipes as protected, so the platform stores a recovery backup before either runs", () => {
+		expect(wipes !== undefined && "protectedActions" in wipes ? wipes.protectedActions : undefined).toEqual([
+			"map",
+			"full",
+		]);
+	});
+
+	test("leaves requiresRunning off, which the bridge demands of a module with protected actions", () => {
+		expect(wipes !== undefined && "requiresRunning" in wipes ? wipes.requiresRunning : undefined).toBeFalsy();
+	});
+
+	test("protects only actions the module really declares", () => {
+		const declared = wipes !== undefined && wipes.kind === BridgeKind.Actions ? Object.keys(wipes.actions) : [];
+
+		for (const action of wipes !== undefined && "protectedActions" in wipes ? (wipes.protectedActions ?? []) : []) {
+			expect(declared).toContain(action);
+		}
+	});
+
+	test("offers a button for every protected wipe", () => {
+		const section = sectionOf("controls", "wipe");
+		const buttons = section !== undefined && "actions" in section ? (section.actions ?? []) : [];
+
+		expect(buttons.map((action) => action.id)).toEqual([
+			"map",
+			"full",
+		]);
+	});
+});
+
+describe("explaining the roster and the health card", () => {
+	test("gives the online roster and the health card a help line in both languages", () => {
+		for (const [tab, id] of [
+			[
+				"players",
+				"online",
+			],
+			[
+				"controls",
+				"health",
+			],
+		] as const) {
+			const section = sectionOf(tab, id);
+			const help = section !== undefined && "help" in section ? section.help : undefined;
+
+			expect(help?.ar.length, id).toBeGreaterThan(0);
+			expect(help?.en.length, id).toBeGreaterThan(0);
+		}
 	});
 });
 
