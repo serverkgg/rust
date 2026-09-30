@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { compileGlobs, matchesAny } from "@serverkgg/bridge/manifest";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { applyWipe, consumeWipe, parseWipeKind, WIPE_MARKER, WipeKind, wipeTargets } from "./wipe";
 
 const IDENTITY = "server/serverk";
@@ -136,6 +137,7 @@ const identityWith = (paths: string[]) => {
 	);
 
 	const globs: string[] = [];
+	const reported: Bridge.Activity[] = [];
 
 	const context = {
 		files: {
@@ -186,12 +188,18 @@ const identityWith = (paths: string[]) => {
 				stored.delete(path);
 			},
 		},
+		activity: {
+			report(entry: Bridge.Activity) {
+				reported.push(entry);
+			},
+		},
 		log() {},
 	} as unknown as Bridge.Context;
 
 	return {
 		context,
 		globs,
+		reported,
 		stored,
 	};
 };
@@ -251,6 +259,61 @@ describe("applying a wipe the platform runs with the server stopped", () => {
 
 		expect(stored.has(WIPE_MARKER)).toBe(false);
 		expect(stored.size).toBe(0);
+	});
+});
+
+describe("telling the owner what a wipe removed", () => {
+	test("reports a map wipe with its scope and the number of files it removed", async () => {
+		const { context, reported } = identityWith(listing);
+
+		await applyWipe(context, WipeKind.Map);
+
+		expect(reported).toEqual([
+			{
+				name: BridgeEventName.WorldWiped,
+				text: {
+					ar: "تم وايب الماب (6 ملفات)",
+					en: "Wiped the map (6 files)",
+				},
+				details: {
+					scope: WipeKind.Map,
+					files: 6,
+				},
+			},
+		]);
+	});
+
+	test("reports a full wipe with every file it removed, player databases included", async () => {
+		const { context, reported } = identityWith(listing);
+
+		await applyWipe(context, WipeKind.Full);
+
+		expect(reported.map((entry) => entry.name)).toEqual([
+			BridgeEventName.WorldWiped,
+		]);
+		expect(reported.at(0)?.details).toEqual({
+			scope: WipeKind.Full,
+			files: listing.length,
+		});
+		expect(reported.at(0)?.text.en).toBe(`Wiped the map and player data (${listing.length} files)`);
+	});
+
+	test("reports the wipe a marker from a previous release applies on start", async () => {
+		const { context, reported, stored } = identityWith(listing);
+
+		stored.set(WIPE_MARKER, "map\n");
+
+		await consumeWipe(context);
+
+		expect(reported.at(0)?.details?.files).toBe(world.length + occlusion.length);
+	});
+
+	test("reports nothing when no wipe is waiting", async () => {
+		const { context, reported } = identityWith(listing);
+
+		await consumeWipe(context);
+
+		expect(reported).toEqual([]);
 	});
 });
 

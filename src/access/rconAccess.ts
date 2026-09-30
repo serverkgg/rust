@@ -1,7 +1,10 @@
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { createRconAccess, RCON_PASSWORD_LENGTH, type RconAccessPassword } from "@serverkgg/bridge/rcon";
 import { generateToken } from "@serverkgg/bridge/utils";
 import { RCON_PROTOCOL, readInstallStamp, writeInstallStamp } from "../shared";
+
+const RCON_TARGET = "rcon";
 
 const NOT_GENERATED: Bridge.Text = {
 	ar: "شغّل سيرفرك مرة عشان تتولد كلمة المرور.",
@@ -31,6 +34,18 @@ export const rotateRconPassword = async (context: Bridge.Context) => {
 	await writeInstallStamp(context, {
 		...stamp,
 		rconPasswordNext: generateToken(RCON_PASSWORD_LENGTH),
+	});
+
+	context.activity.report({
+		name: BridgeEventName.SecretRotated,
+		text: {
+			ar: `تم تغيير كلمة مرور ${RCON_PROTOCOL.ar}، والتغيير ينطبق مع التشغيل الجاي`,
+			en: `Changed the ${RCON_PROTOCOL.en} password, takes effect on the next start`,
+		},
+		subject: RCON_PROTOCOL.en,
+		details: {
+			target: RCON_TARGET,
+		},
 	});
 };
 

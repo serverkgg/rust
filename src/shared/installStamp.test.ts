@@ -21,6 +21,9 @@ const contextWith = () => {
 		log(message: string) {
 			logged.push(message);
 		},
+		activity: {
+			report() {},
+		},
 	} as unknown as Bridge.Context;
 
 	return {

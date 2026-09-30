@@ -39,6 +39,9 @@ const contextWith = (options: { stored?: Bridge.Values; reads?: string[]; merges
 				},
 			},
 		},
+		activity: {
+			report() {},
+		},
 	} as unknown as Bridge.Context;
 };
 

@@ -23,6 +23,9 @@ const fakeLogs = () => {
 				};
 			},
 		},
+		activity: {
+			report() {},
+		},
 	} as unknown as Bridge.Context;
 
 	return {

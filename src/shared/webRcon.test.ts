@@ -227,6 +227,9 @@ const contextWith = (passwords: string[]) => {
 				});
 			},
 		},
+		activity: {
+			report() {},
+		},
 	} as unknown as Bridge.Context;
 };
 
@@ -409,6 +412,9 @@ describe("keeping one socket open to rust's web rcon", () => {
 					async exists() {
 						return false;
 					},
+				},
+				activity: {
+					report() {},
 				},
 			} as unknown as Bridge.Context;
 

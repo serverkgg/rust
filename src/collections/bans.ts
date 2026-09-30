@@ -2,6 +2,7 @@ import { type Bridge, BridgeKind } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import {
 	banCommand,
+	nameOf,
 	presenceOf,
 	type RustBan,
 	rconCommand,
@@ -40,6 +41,18 @@ export const bans: Bridge.Collection = {
 			}),
 		);
 
+		context.activity.report({
+			name: BridgeEventName.PlayerBanned,
+			text: {
+				ar: `تم حظر ${steamId}`,
+				en: `Banned ${steamId}`,
+			},
+			subject: steamId,
+			details: {
+				steamId,
+			},
+		});
+
 		context.log("banned a steam id that was not online", {
 			steamId,
 		});
@@ -50,6 +63,18 @@ export const bans: Bridge.Collection = {
 
 			context.log("lifted a ban from the panel", {
 				steamId: row.id,
+			});
+
+			context.activity.report({
+				name: BridgeEventName.PlayerUnbanned,
+				text: {
+					ar: `تم فك الحظر عن ${nameOf(row)}`,
+					en: `Unbanned ${nameOf(row)}`,
+				},
+				subject: nameOf(row),
+				details: {
+					steamId: row.id,
+				},
 			});
 		},
 	},

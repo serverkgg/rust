@@ -35,6 +35,9 @@ const contextWith = () => {
 			},
 		},
 		log,
+		activity: {
+			report() {},
+		},
 	} as unknown as Bridge.Context;
 
 	return {

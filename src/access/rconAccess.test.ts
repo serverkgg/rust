@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { RCON_ACCESS_VARIABLE, RCON_PASSWORD_LENGTH } from "@serverkgg/bridge/rcon";
 import { readInstallStamp, writeInstallStamp } from "../shared";
 import { rconAccess, rconAccessPassword, rotateRconPassword } from "./rconAccess";
@@ -11,6 +12,7 @@ const englishOf = (copy: Bridge.Text | string | null | undefined) => {
 const contextWith = (variables: Record<string, string> = {}) => {
 	const stored = new Map<string, string>();
 	const logged: string[] = [];
+	const reported: Bridge.Activity[] = [];
 
 	const context = {
 		variable(key: string) {
@@ -30,6 +32,11 @@ const contextWith = (variables: Record<string, string> = {}) => {
 				stored.set(path, content);
 			},
 		},
+		activity: {
+			report(entry: Bridge.Activity) {
+				reported.push(entry);
+			},
+		},
 		log(message: string) {
 			logged.push(message);
 		},
@@ -38,6 +45,7 @@ const contextWith = (variables: Record<string, string> = {}) => {
 	return {
 		context,
 		logged,
+		reported,
 	};
 };
 
@@ -98,6 +106,39 @@ describe("rotating the rcon password", () => {
 		expect(stamp?.rconPassword).toBe("secret");
 		expect(stamp?.rconPasswordNext).toHaveLength(RCON_PASSWORD_LENGTH);
 		expect(stamp?.buildId).toBe("1");
+	});
+
+	test("reports the rotation naming only the target, never the old or the new password", async () => {
+		const { context, reported } = contextWith();
+
+		await writeInstallStamp(context, {
+			buildId: "1",
+			rconPassword: "secret-old-password",
+			rconPasswordNext: null,
+		});
+
+		await rotateRconPassword(context);
+
+		const stamp = await readInstallStamp(context);
+		const serialized = JSON.stringify(reported);
+
+		expect(reported.map((entry) => entry.name)).toEqual([
+			BridgeEventName.SecretRotated,
+		]);
+		expect(reported.at(0)?.subject).toBe("WebRCON");
+		expect(reported.at(0)?.details).toEqual({
+			target: "rcon",
+		});
+		expect(serialized).not.toContain("secret-old-password");
+		expect(serialized).not.toContain(stamp?.rconPasswordNext ?? "unreachable");
+	});
+
+	test("reports nothing when the rotation is refused", async () => {
+		const { context, reported } = contextWith();
+
+		await expect(rotateRconPassword(context)).rejects.toBeInstanceOf(BridgeUserError);
+
+		expect(reported).toEqual([]);
 	});
 });
 

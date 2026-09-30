@@ -36,11 +36,35 @@ export const players: Bridge.Collection = {
 			await rconCommand(context, kickCommand(row.id));
 
 			context.emit(BridgeEventName.PlayerKicked, presenceOfRow(row));
+
+			context.activity.report({
+				name: BridgeEventName.PlayerKicked,
+				text: {
+					ar: `تم طرد ${nameOf(row)}`,
+					en: `Kicked ${nameOf(row)}`,
+				},
+				subject: nameOf(row),
+				details: {
+					steamId: row.id,
+				},
+			});
 		},
 		async ban(context, row) {
 			await rconCommand(context, banCommand(row.id, nameOf(row)));
 
 			context.emit(BridgeEventName.PlayerBanned, presenceOfRow(row));
+
+			context.activity.report({
+				name: BridgeEventName.PlayerBanned,
+				text: {
+					ar: `تم حظر ${nameOf(row)}`,
+					en: `Banned ${nameOf(row)}`,
+				},
+				subject: nameOf(row),
+				details: {
+					steamId: row.id,
+				},
+			});
 		},
 	},
 };

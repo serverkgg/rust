@@ -1,4 +1,5 @@
 import type { Bridge } from "@serverkgg/bridge";
+import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { IDENTITY_DIRECTORY } from "./rustApp";
 
 export const WIPE_MARKER = ".serverk-wipe";
@@ -42,6 +43,25 @@ export const pendingWipe = async (context: Bridge.Context) => {
 	return parseWipeKind(await context.files.read(WIPE_MARKER));
 };
 
+export const wipeText = (kind: WipeKind, files: number): Bridge.Text => {
+	const count = {
+		ar: files === 1 ? "ملف واحد" : files === 2 ? "ملفين" : files <= 10 ? `${files} ملفات` : `${files} ملف`,
+		en: files === 1 ? "1 file" : `${files} files`,
+	};
+
+	if (kind === WipeKind.Full) {
+		return {
+			ar: `تم وايب كامل للماب وبيانات اللاعبين (${count.ar})`,
+			en: `Wiped the map and player data (${count.en})`,
+		};
+	}
+
+	return {
+		ar: `تم وايب الماب (${count.ar})`,
+		en: `Wiped the map (${count.en})`,
+	};
+};
+
 export const applyWipe = async (context: Bridge.Context, kind: WipeKind) => {
 	const entries = await context.files.list(`${IDENTITY_DIRECTORY}/*`);
 	const targets = wipeTargets(
@@ -58,6 +78,15 @@ export const applyWipe = async (context: Bridge.Context, kind: WipeKind) => {
 	context.log("wipe applied, the server builds a new map on its next start", {
 		kind,
 		removed: targets.length,
+	});
+
+	context.activity.report({
+		name: BridgeEventName.WorldWiped,
+		text: wipeText(kind, targets.length),
+		details: {
+			scope: kind,
+			files: targets.length,
+		},
 	});
 };
 

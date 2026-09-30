@@ -1,4 +1,4 @@
-import { type Bridge, BridgeKind } from "@serverkgg/bridge";
+import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { RCON_PASSWORD_LENGTH } from "@serverkgg/bridge/rcon";
 import { createSteamcmd, installedBuildId, missingGameRoots } from "@serverkgg/bridge/steam";
@@ -7,6 +7,25 @@ import { GAME_ROOTS, readInstallStamp, STEAM_APP_ID, writeInstallStamp } from ".
 import { seedConfig } from "./seedConfig";
 
 const LABEL = "rust";
+
+export const FILES_MISSING: Bridge.Text = {
+	ar: "التنزيل خلص بس ملفات رست ناقصة. جرّب التثبيت مرة ثانية.",
+	en: "The download finished but some Rust files are missing. Try the install again.",
+};
+
+export const installedText = (buildId: string | null): Bridge.Text => {
+	if (buildId === null) {
+		return {
+			ar: "تم تثبيت رست",
+			en: "Installed Rust",
+		};
+	}
+
+	return {
+		ar: `تم تثبيت رست (البيلد ${buildId})`,
+		en: `Installed Rust (build ${buildId})`,
+	};
+};
 
 const steamcmdOf = (context: Bridge.Context) => {
 	return createSteamcmd(context, {
@@ -38,7 +57,9 @@ export const install: Bridge.Install = {
 		const missing = await missingGameRoots(context, GAME_ROOTS);
 
 		if (missing.length > 0) {
-			throw new Error(`steamcmd finished but ${missing.join(", ")} is missing`);
+			throw new BridgeUserError(FILES_MISSING, {
+				cause: new Error(`steamcmd finished but ${missing.join(", ")} is missing`),
+			});
 		}
 
 		await steamcmd.linkSteamClient();
@@ -56,6 +77,18 @@ export const install: Bridge.Install = {
 				from: stamp.buildId,
 				to: buildId,
 			});
+
+			context.activity.report({
+				name: BridgeEventName.ServerUpdated,
+				text: {
+					ar: `تم تحديث رست من البيلد ${stamp.buildId} إلى ${buildId}`,
+					en: `Updated Rust from build ${stamp.buildId} to ${buildId}`,
+				},
+				details: {
+					from: stamp.buildId,
+					to: buildId,
+				},
+			});
 		}
 
 		await writeInstallStamp(context, {
@@ -63,6 +96,16 @@ export const install: Bridge.Install = {
 			rconPassword: stamp?.rconPassword ?? generateToken(RCON_PASSWORD_LENGTH),
 			rconPasswordNext: stamp?.rconPasswordNext ?? null,
 		});
+
+		if (stamp === null) {
+			context.activity.report({
+				name: BridgeEventName.GameInstalled,
+				text: installedText(buildId),
+				details: {
+					build: buildId,
+				},
+			});
+		}
 
 		context.log("install complete", {
 			app: STEAM_APP_ID,
