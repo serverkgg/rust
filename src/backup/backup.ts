@@ -4,8 +4,8 @@ import { awaitSaveComplete, SAVE_CONFIRM_TIMEOUT_MS, saveWorld } from "../shared
 const SETTLE_SECONDS = 10;
 
 export const SAVE_UNCONFIRMED: Bridge.Text = {
-	ar: "سيرفرك ما أكّد إنه حفظ الماب قبل النسخة. جرّب مرة ثانية، ولو تكرر أوقف السيرفر وخذ النسخة وهو مطفي.",
-	en: "Your server did not confirm it saved the world before the backup. Try again, and if it keeps happening stop the server and take the backup with it off.",
+	ar: "لم يؤكد سيرفرك حفظ الماب قبل النسخة الاحتياطية. جرب مرة ثانية، وإذا تكرر ذلك فأوقف السيرفر وخذ النسخة وهو متوقف.",
+	en: "Your server didn't confirm it saved the map before the backup. Try again, and if it keeps happening, stop the server and take the backup while it's stopped.",
 };
 
 export const saveBeforeBackup = async (

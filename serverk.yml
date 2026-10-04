@@ -8,11 +8,11 @@ metadata:
     ar: رست
     en: Rust
   description:
-    ar: سيرفر رست — عالم مفتوح قاسي، تبدأ بحجر وتنتهي بقاعدة مسلّحة. اجمع الموارد، ابني بيتك، سوّ فريق مع أصحابك، وسوّوا ريد على قواعد غيركم. السيد وحجم الماب والوايب كلها بيدك من اللوحة.
-    en: Rust dedicated servers — a harsh open world where you start with a rock and end with a fortified base. Gather, build, team up with your friends and raid everyone else. The seed, the world size and the wipe are all yours from the panel.
+    ar: سيرفر رست في ماب مفتوحة وقاسية، تبدأ فيها بحجر وتنتهي بقاعدة محصّنة. اجمع الموارد، وابنِ بيتك، وكوّن فريقًا مع أصحابك، وأغيروا على قواعد غيركم. السيد وحجم الماب والوايب كلها تحت تحكمك من اللوحة.
+    en: Rust dedicated servers in a harsh open world, where you start with a rock and end with a fortified base. Gather, build, team up with your friends and raid everyone else. The seed, the map size and the wipe are all yours to control from the panel.
   tagline:
-    ar: ابني قاعدتك، دافع عنها، وسوّ ريد على غيرك — سيرفرك جاهز خلال دقيقة
-    en: Build your base, defend it, raid the rest — your server, ready in a minute
+    ar: ابنِ قاعدتك ودافع عنها وأغِر على غيرك، وسيرفرك جاهز خلال دقيقة
+    en: Build your base, defend it, raid the rest, on a server ready in a minute
   category: survival
   logo: assets/logo.webp
   banner: assets/banner.webp
@@ -41,7 +41,7 @@ container:
         ar: رست
         en: Rust
       hint:
-        ar: افتح الكونسول داخل اللعبة بزر F1 واكتب client.connect وبعده العنوان زي ما هو.
+        ar: افتح الكونسول داخل اللعبة بزر F1، واكتب client.connect ثم العنوان كما يظهر.
         en: Open the in-game console with F1 and type client.connect followed by the address, exactly as shown.
       hostRange:
         default: 28015
@@ -55,8 +55,8 @@ container:
         ar: الاستعلام
         en: Query
       hint:
-        ar: منفذ الاستعلام — منه يظهر سيرفرك في قائمة سيرفرات رست. اللاعب ما يكتبه أبداً.
-        en: The query port — it is how your server appears in the Rust server browser. Players never type it.
+        ar: منفذ الاستعلام، ومنه يظهر سيرفرك في قائمة سيرفرات رست. لا يكتبه اللاعب أبدًا.
+        en: The query port. It's how your server appears in the Rust server browser. Players never type it.
       hostRange:
         default: 28115
         min: 28115
@@ -68,8 +68,8 @@ container:
         ar: WebRCON
         en: WebRCON
       hint:
-        ar: للأدوات الخارجية بس، ما يدخل منه لاعب. يشتغل لما تفتح الوصول عن بُعد من اللوحة.
-        en: For external tools only, never for players. Live once remote access is turned on in the panel.
+        ar: للأدوات الخارجية فقط، ولا يدخل منه اللاعبون. يتفعّل عند تشغيل الوصول عن بُعد من اللوحة.
+        en: For external tools only, never for players. It works once remote access is turned on in the panel.
       join: separate
       hostRange:
         default: 12500
@@ -93,8 +93,8 @@ backup:
 secrets:
   - key: STEAM_WEB_API_KEY
     description:
-      ar: مفتاح Steam Web API للمنصة — منه نجيب صور حسابات Steam اللي تظهر في جدول اللاعبين.
-      en: The platform's Steam Web API key — it reads the Steam avatars shown in the players list.
+      ar: مفتاح Steam Web API الخاص بالمنصة، ونجلب به صور حسابات Steam التي تظهر في جدول اللاعبين.
+      en: The platform's Steam Web API key. It reads the Steam avatars shown in the players list.
     required: false
 
 reset:
@@ -148,8 +148,8 @@ files:
       color: "#cd412b"
       restart: true
       note:
-        ar: إعدادات سيرفرك — الاسم، الوصف، عدد اللاعبين، حجم الماب، والسيد. عدّلها من تبويب الإعدادات أفضل، وأي تعديل يبي إعادة تشغيل.
-        en: Your server settings — name, description, player slots, world size and seed. The settings tab is the easier way, and any change needs a restart.
+        ar: إعدادات سيرفرك، من الاسم والوصف وعدد اللاعبين إلى حجم الماب والسيد. الأسهل تعديلها من تبويب الإعدادات، ويُطبَّق أي تعديل بعد الريستارت.
+        en: Your server settings, from the name, description and player slots to the map size and seed. The settings tab is the easier way, and any change needs a restart.
     - match: server/serverk/cfg/users.cfg
       label:
         ar: الأدمن
@@ -158,27 +158,27 @@ files:
       color: "#4a8fd4"
       restart: true
       note:
-        ar: قائمة الأدمن والمشرفين. كل سطر ownerid أو moderatorid ومعه رقم Steam. أضف نفسك هنا عشان تفتح كونسول الأدمن داخل اللعبة بزر F1.
+        ar: قائمة الأدمن والمودريتر. كل سطر ownerid أو moderatorid ومعه رقم Steam. أضف نفسك هنا لتفتح كونسول الأدمن داخل اللعبة بزر F1.
         en: Your admins and moderators. Each line is an ownerid or moderatorid with a Steam ID. Add yourself here to unlock the in-game admin console on F1.
     - match: server/serverk/cfg/bans.cfg
       label:
-        ar: المحظورين
+        ar: المحظورون
         en: Bans
       icon: sword
       color: "#c77dff"
       restart: true
       note:
-        ar: اللاعبين المحظورين. رست يكتب فيه بنفسه لما تحظر أحد من اللوحة أو من الكونسول.
+        ar: اللاعبون المحظورون. تكتب رست في هذا الملف بنفسها عندما تحظر لاعبًا من اللوحة أو من الكونسول.
         en: The banned players. Rust writes this itself whenever you ban somebody from the panel or the console.
     - match: server/serverk
       label:
-        ar: بيانات العالم
-        en: World data
+        ar: بيانات الماب
+        en: Map data
       icon: map
       color: "#5ba32b"
       note:
-        ar: الماب وكل شيء مبني فيها وبيانات اللاعبين. لا تعدّل عليه والسيرفر شغّال، وخذ نسخة احتياطية قبل أي شي.
-        en: The map, everything built on it and the player data. Do not touch it while the server runs, and take a backup first.
+        ar: الماب وكل ما بُني فيها وبيانات اللاعبين. لا تعدّل عليها والسيرفر شغّال، وخذ نسخة احتياطية قبل أي تعديل.
+        en: The map, everything built on it and the player data. Don't touch it while the server runs, and take a backup first.
 
 guideTags:
   - id: start
@@ -196,7 +196,7 @@ guides:
       ar: البدء بسيرفرك
       en: Getting started
     summary:
-      ar: أنشئ سيرفر رست، ادخله مع أصحابك، وخل نفسك أدمن.
+      ar: أنشئ سيرفر رست، وادخله مع أصحابك، واجعل نفسك أدمن.
       en: Create your Rust server, join it with your friends, and make yourself admin.
     tags:
       - start
@@ -208,10 +208,10 @@ guides:
       en: guides/getting-started/en.md
   - id: wipes
     title:
-      ar: الوايب — متى وكيف
-      en: Wipes — when and how
+      ar: متى تعمل وايب وكيف
+      en: When and how to wipe
     summary:
-      ar: وش يعني وايب في رست، وش الفرق بين وايب الماب والوايب الكامل، وكيف تسويه من اللوحة.
+      ar: معنى الوايب في رست، والفرق بين وايب الماب والوايب الكامل، وكيف تنفّذه من اللوحة.
       en: What a wipe means in Rust, the difference between a map wipe and a full wipe, and how to run one from the panel.
     tags:
       - wipe

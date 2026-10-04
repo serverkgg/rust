@@ -9,7 +9,7 @@ import { seedConfig } from "./seedConfig";
 const LABEL = "rust";
 
 export const FILES_MISSING: Bridge.Text = {
-	ar: "التنزيل خلص بس ملفات رست ناقصة. جرّب التثبيت مرة ثانية.",
+	ar: "اكتمل التنزيل لكن بعض ملفات رست ناقصة. جرب التثبيت مرة ثانية.",
 	en: "The download finished but some Rust files are missing. Try the install again.",
 };
 

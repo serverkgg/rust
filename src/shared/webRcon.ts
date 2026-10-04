@@ -19,8 +19,8 @@ export const REPLY_TIMEOUT_MS = 15_000;
 export const FIRE_SETTLE_MS = 500;
 
 const UNREACHABLE: Bridge.Text = {
-	ar: "ما قدرنا نوصل لسيرفرك. تأكد إنه شغّال وجرّب مرة ثانية.",
-	en: "We could not reach your server. Make sure it is running and try again.",
+	ar: "تعذّر الوصول إلى سيرفرك. تأكد من أنه شغّال، وجرب مرة ثانية.",
+	en: "We couldn't reach your server. Make sure it's running and try again.",
 };
 
 export interface WebRconRequest {

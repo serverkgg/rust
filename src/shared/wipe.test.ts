@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { compileGlobs, matchesAny } from "@serverkgg/bridge/manifest";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
@@ -33,16 +33,16 @@ const listing = [
 ];
 
 describe("reading the wipe a player asked for", () => {
-	test("reads both kinds the panel can request", () => {
+	it("reads both kinds the panel can request", () => {
 		expect(parseWipeKind("map")).toBe(WipeKind.Map);
 		expect(parseWipeKind("full")).toBe(WipeKind.Full);
 	});
 
-	test("reads the trailing newline the marker file carries", () => {
+	it("reads the trailing newline the marker file carries", () => {
 		expect(parseWipeKind("full\n")).toBe(WipeKind.Full);
 	});
 
-	test("refuses a marker it does not understand, so a stray file never wipes a server", () => {
+	it("refuses a marker it does not understand, so a stray file never wipes a server", () => {
 		for (const raw of [
 			"",
 			"everything",
@@ -55,24 +55,24 @@ describe("reading the wipe a player asked for", () => {
 });
 
 describe("choosing what a map wipe deletes", () => {
-	test("deletes the map and every save beside it", () => {
+	it("deletes the map and every save beside it", () => {
 		expect(wipeTargets(listing, WipeKind.Map)).toEqual([
 			...world,
 			...occlusion,
 		]);
 	});
 
-	test("deletes the occlusion cache rust leaves beside a map, including the one a dead map left behind", () => {
+	it("deletes the occlusion cache rust leaves beside a map, including the one a dead map left behind", () => {
 		expect(wipeTargets(occlusion, WipeKind.Map)).toEqual(occlusion);
 	});
 
-	test("keeps the blueprints players unlocked", () => {
+	it("keeps the blueprints players unlocked", () => {
 		for (const path of player) {
 			expect(wipeTargets(listing, WipeKind.Map)).not.toContain(path);
 		}
 	});
 
-	test("keeps the config a player edited by hand", () => {
+	it("keeps the config a player edited by hand", () => {
 		expect(
 			wipeTargets(
 				[
@@ -87,11 +87,11 @@ describe("choosing what a map wipe deletes", () => {
 });
 
 describe("choosing what a full wipe deletes", () => {
-	test("deletes the map, the occlusion cache, the saves and every player database", () => {
+	it("deletes the map, the occlusion cache, the saves and every player database", () => {
 		expect(wipeTargets(listing, WipeKind.Full)).toEqual(listing);
 	});
 
-	test("deletes the journals sqlite leaves beside a database", () => {
+	it("deletes the journals sqlite leaves beside a database", () => {
 		expect(
 			wipeTargets(
 				[
@@ -103,7 +103,7 @@ describe("choosing what a full wipe deletes", () => {
 		).toHaveLength(2);
 	});
 
-	test("keeps a data file that is not an occlusion cache", () => {
+	it("keeps a data file that is not an occlusion cache", () => {
 		expect(
 			wipeTargets(
 				[
@@ -116,7 +116,7 @@ describe("choosing what a full wipe deletes", () => {
 		).toEqual([]);
 	});
 
-	test("still keeps the config, because a wipe is not a reset", () => {
+	it("still keeps the config, because a wipe is not a reset", () => {
 		expect(
 			wipeTargets(
 				[
@@ -205,7 +205,7 @@ const identityWith = (paths: string[]) => {
 };
 
 describe("applying a wipe the platform runs with the server stopped", () => {
-	test("lists only the files directly inside the serverk identity", async () => {
+	it("lists only the files directly inside the serverk identity", async () => {
 		const { context, globs } = identityWith(listing);
 
 		await applyWipe(context, WipeKind.Map);
@@ -215,7 +215,7 @@ describe("applying a wipe the platform runs with the server stopped", () => {
 		]);
 	});
 
-	test("leaves a world outside the serverk identity and the config folder untouched", async () => {
+	it("leaves a world outside the serverk identity and the config folder untouched", async () => {
 		const outside = [
 			"server/my_server_identity/proceduralmap.3000.4242.221.map",
 			"server/my_server_identity/player.blueprints.5.db",
@@ -234,7 +234,7 @@ describe("applying a wipe the platform runs with the server stopped", () => {
 		]).toEqual(outside);
 	});
 
-	test("clears the map and keeps the blueprints on a map wipe", async () => {
+	it("clears the map and keeps the blueprints on a map wipe", async () => {
 		const { context, stored } = identityWith(listing);
 
 		await applyWipe(context, WipeKind.Map);
@@ -244,7 +244,7 @@ describe("applying a wipe the platform runs with the server stopped", () => {
 		]).toEqual(player);
 	});
 
-	test("clears the player databases too on a full wipe", async () => {
+	it("clears the player databases too on a full wipe", async () => {
 		const { context, stored } = identityWith(listing);
 
 		await applyWipe(context, WipeKind.Full);
@@ -252,7 +252,7 @@ describe("applying a wipe the platform runs with the server stopped", () => {
 		expect(stored.size).toBe(0);
 	});
 
-	test("needs no marker, because the platform already stopped the server and stored a recovery backup", async () => {
+	it("needs no marker, because the platform already stopped the server and stored a recovery backup", async () => {
 		const { context, stored } = identityWith(world);
 
 		await applyWipe(context, WipeKind.Map);
@@ -263,7 +263,7 @@ describe("applying a wipe the platform runs with the server stopped", () => {
 });
 
 describe("telling the owner what a wipe removed", () => {
-	test("reports a map wipe with its scope and the number of files it removed", async () => {
+	it("reports a map wipe with its scope and the number of files it removed", async () => {
 		const { context, reported } = identityWith(listing);
 
 		await applyWipe(context, WipeKind.Map);
@@ -283,7 +283,7 @@ describe("telling the owner what a wipe removed", () => {
 		]);
 	});
 
-	test("reports a full wipe with every file it removed, player databases included", async () => {
+	it("reports a full wipe with every file it removed, player databases included", async () => {
 		const { context, reported } = identityWith(listing);
 
 		await applyWipe(context, WipeKind.Full);
@@ -298,7 +298,7 @@ describe("telling the owner what a wipe removed", () => {
 		expect(reported.at(0)?.text.en).toBe(`Wiped the map and player data (${listing.length} files)`);
 	});
 
-	test("reports the wipe a marker from a previous release applies on start", async () => {
+	it("reports the wipe a marker from a previous release applies on start", async () => {
 		const { context, reported, stored } = identityWith(listing);
 
 		stored.set(WIPE_MARKER, "map\n");
@@ -308,7 +308,7 @@ describe("telling the owner what a wipe removed", () => {
 		expect(reported.at(0)?.details?.files).toBe(world.length + occlusion.length);
 	});
 
-	test("reports nothing when no wipe is waiting", async () => {
+	it("reports nothing when no wipe is waiting", async () => {
 		const { context, reported } = identityWith(listing);
 
 		await consumeWipe(context);
@@ -318,7 +318,7 @@ describe("telling the owner what a wipe removed", () => {
 });
 
 describe("honouring a wipe the previous release left for the next start", () => {
-	test("applies a marker a previous release wrote, then removes it", async () => {
+	it("applies a marker a previous release wrote, then removes it", async () => {
 		const { context, stored } = identityWith(listing);
 
 		stored.set(WIPE_MARKER, "full\n");
@@ -328,7 +328,7 @@ describe("honouring a wipe the previous release left for the next start", () => 
 		expect(stored.size).toBe(0);
 	});
 
-	test("drops a marker it cannot read without wiping anything", async () => {
+	it("drops a marker it cannot read without wiping anything", async () => {
 		const { context, stored } = identityWith(listing);
 
 		stored.set(WIPE_MARKER, "everything\n");
@@ -339,7 +339,7 @@ describe("honouring a wipe the previous release left for the next start", () => 
 		expect(stored.size).toBe(listing.length);
 	});
 
-	test("starts normally when no wipe is waiting", async () => {
+	it("starts normally when no wipe is waiting", async () => {
 		const { context, stored } = identityWith(listing);
 
 		await consumeWipe(context);

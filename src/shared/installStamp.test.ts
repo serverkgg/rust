@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { installStampOf, promoteRconPassword, readInstallStamp, writeInstallStamp } from "./installStamp";
 
@@ -33,7 +33,7 @@ const contextWith = () => {
 };
 
 describe("reading the install stamp the rcon password lives in", () => {
-	test("reads back the build and the password the install wrote", () => {
+	it("reads back the build and the password the install wrote", () => {
 		expect(
 			installStampOf({
 				buildId: "12345",
@@ -46,7 +46,7 @@ describe("reading the install stamp the rcon password lives in", () => {
 		});
 	});
 
-	test("reads the password waiting for the next start", () => {
+	it("reads the password waiting for the next start", () => {
 		expect(
 			installStampOf({
 				buildId: "12345",
@@ -56,7 +56,7 @@ describe("reading the install stamp the rcon password lives in", () => {
 		).toBe("rotated");
 	});
 
-	test("reads an empty or malformed pending password as none", () => {
+	it("reads an empty or malformed pending password as none", () => {
 		for (const raw of [
 			"",
 			1234,
@@ -71,11 +71,11 @@ describe("reading the install stamp the rcon password lives in", () => {
 		}
 	});
 
-	test("counts a stamp with no password as absent, because rcon cannot be reached without one", () => {
+	it("counts a stamp with no password as absent, because rcon cannot be reached without one", () => {
 		expect(installStampOf({})).toBeNull();
 	});
 
-	test("counts an empty password as absent rather than dialling rcon with it", () => {
+	it("counts an empty password as absent rather than dialling rcon with it", () => {
 		expect(
 			installStampOf({
 				rconPassword: "",
@@ -83,7 +83,7 @@ describe("reading the install stamp the rcon password lives in", () => {
 		).toBeNull();
 	});
 
-	test("counts a password of the wrong type as absent", () => {
+	it("counts a password of the wrong type as absent", () => {
 		expect(
 			installStampOf({
 				rconPassword: 1234,
@@ -91,11 +91,11 @@ describe("reading the install stamp the rcon password lives in", () => {
 		).toBeNull();
 	});
 
-	test("reads a missing file as no stamp at all", () => {
+	it("reads a missing file as no stamp at all", () => {
 		expect(installStampOf(null)).toBeNull();
 	});
 
-	test("reads a stamp written before the first build was known", () => {
+	it("reads a stamp written before the first build was known", () => {
 		expect(
 			installStampOf({
 				buildId: null,
@@ -106,7 +106,7 @@ describe("reading the install stamp the rcon password lives in", () => {
 });
 
 describe("promoting the rotated password at start", () => {
-	test("hands back the same stamp when nothing is pending, without touching the volume", async () => {
+	it("hands back the same stamp when nothing is pending, without touching the volume", async () => {
 		const { context, logged } = contextWith();
 		const stamp = {
 			buildId: "1",
@@ -119,7 +119,7 @@ describe("promoting the rotated password at start", () => {
 		expect(logged).toEqual([]);
 	});
 
-	test("makes the pending password the live one and clears it, so the process and the driver agree", async () => {
+	it("makes the pending password the live one and clears it, so the process and the driver agree", async () => {
 		const { context, logged } = contextWith();
 
 		const promoted = await promoteRconPassword(context, {
@@ -139,7 +139,7 @@ describe("promoting the rotated password at start", () => {
 		]);
 	});
 
-	test("round-trips a stamp through the volume", async () => {
+	it("round-trips a stamp through the volume", async () => {
 		const { context } = contextWith();
 
 		await writeInstallStamp(context, {

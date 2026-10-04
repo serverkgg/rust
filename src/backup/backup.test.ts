@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
 import { SAVE_CONFIRM_TIMEOUT_MS } from "../shared";
 import { SAVE_UNCONFIRMED, saveBeforeBackup } from "./backup";
@@ -52,7 +52,7 @@ const contextWith = () => {
 };
 
 describe("saving the world before a backup copies it", () => {
-	test("lets the backup copy once rust confirms the save", async () => {
+	it("lets the backup copy once rust confirms the save", async () => {
 		const rust = contextWith();
 
 		await saveBeforeBackup(
@@ -66,7 +66,7 @@ describe("saving the world before a backup copies it", () => {
 		expect(rust.errors).toEqual([]);
 	});
 
-	test("fails the backup when rust never confirms, so a failed save is never labelled consistent", async () => {
+	it("fails the backup when rust never confirms, so a failed save is never labelled consistent", async () => {
 		const rust = contextWith();
 
 		const refused = saveBeforeBackup(rust.context, async () => {}, 20);
@@ -78,7 +78,7 @@ describe("saving the world before a backup copies it", () => {
 		expect(rust.errors).toHaveLength(1);
 	});
 
-	test("fails the backup when rcon refuses the save", async () => {
+	it("fails the backup when rcon refuses the save", async () => {
 		const rust = contextWith();
 
 		await expect(
@@ -92,7 +92,7 @@ describe("saving the world before a backup copies it", () => {
 		).rejects.toThrow("rcon is down");
 	});
 
-	test("still accepts a confirmation that arrives late inside the window", async () => {
+	it("still accepts a confirmation that arrives late inside the window", async () => {
 		const rust = contextWith();
 
 		await saveBeforeBackup(
@@ -108,7 +108,7 @@ describe("saving the world before a backup copies it", () => {
 		expect(rust.errors).toEqual([]);
 	});
 
-	test("refuses the backup once the window closes, and not before", async () => {
+	it("refuses the backup once the window closes, and not before", async () => {
 		const rust = contextWith();
 		const windowMs = 60;
 		const started = performance.now();
@@ -123,7 +123,7 @@ describe("saving the world before a backup copies it", () => {
 		expect(waited).toBeLessThan(windowMs + 500);
 	});
 
-	test("gives rust thirty seconds by default", () => {
+	it("gives rust thirty seconds by default", () => {
 		expect(SAVE_CONFIRM_TIMEOUT_MS).toBe(30_000);
 	});
 });

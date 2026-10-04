@@ -1,4 +1,4 @@
-import { describe, expect, mock, test } from "bun:test";
+import { describe, expect, it, mock } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import * as webRcon from "../shared/webRcon";
@@ -57,7 +57,7 @@ const runAction = async (name: string, context: Bridge.Context, args: Bridge.Val
 };
 
 describe("telling the owner what the live actions did", () => {
-	test("reports a broadcast with the message it sent", async () => {
+	it("reports a broadcast with the message it sent", async () => {
 		const { context, reported } = recording();
 
 		await runAction("announce", context, {
@@ -68,14 +68,14 @@ describe("telling the owner what the live actions did", () => {
 			{
 				name: BridgeEventName.BroadcastSent,
 				text: {
-					ar: "تم إرسال رسالة للاعبين: «Wipe tonight at 8»",
+					ar: "تم إرسال رسالة إلى اللاعبين: «Wipe tonight at 8»",
 					en: 'Sent a message to players: "Wipe tonight at 8"',
 				},
 			},
 		]);
 	});
 
-	test("cuts a long broadcast to an 80 character excerpt", async () => {
+	it("cuts a long broadcast to an 80 character excerpt", async () => {
 		const { context, reported } = recording();
 		const message = "x".repeat(200);
 
@@ -88,7 +88,7 @@ describe("telling the owner what the live actions did", () => {
 		expect(reported.at(0)?.text.en.endsWith('…"')).toBe(true);
 	});
 
-	test("reports a save as a gameplay change and keeps the world saved event", async () => {
+	it("reports a save as a gameplay change and keeps the world saved event", async () => {
 		const { context, reported, emitted } = recording();
 
 		await runAction("save", context);
@@ -110,7 +110,7 @@ describe("telling the owner what the live actions did", () => {
 		]);
 	});
 
-	test("never puts the rcon password in what it reports", async () => {
+	it("never puts the rcon password in what it reports", async () => {
 		const { context, reported } = recording();
 
 		await runAction("announce", context, {

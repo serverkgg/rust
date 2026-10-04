@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { type RustSettings, settingsOf } from "./rustSettings";
@@ -62,7 +62,7 @@ const identityWith = (paths: string[] | Error) => {
 };
 
 describe("reading which map rust generated from its save file names", () => {
-	test("reads the size and seed of every map and save", () => {
+	it("reads the size and seed of every map and save", () => {
 		expect(mapGenerationsOf(saved)).toEqual([
 			{
 				size: 3000,
@@ -79,7 +79,7 @@ describe("reading which map rust generated from its save file names", () => {
 		]);
 	});
 
-	test("ignores the occlusion cache, the player databases and the config", () => {
+	it("ignores the occlusion cache, the player databases and the config", () => {
 		expect(
 			mapGenerationsOf([
 				`${IDENTITY}/proceduralmap.3000.4242.221_occlusion_3.dat`,
@@ -91,23 +91,23 @@ describe("reading which map rust generated from its save file names", () => {
 });
 
 describe("knowing when a start builds a brand new map", () => {
-	test("keeps the map when the seed and size match the save", () => {
+	it("keeps the map when the seed and size match the save", () => {
 		expect(replacesMap(saved, settingsWith(3000, 4242))).toBe(false);
 	});
 
-	test("replaces the map when the seed changed", () => {
+	it("replaces the map when the seed changed", () => {
 		expect(replacesMap(saved, settingsWith(3000, 99))).toBe(true);
 	});
 
-	test("replaces the map when the size changed", () => {
+	it("replaces the map when the size changed", () => {
 		expect(replacesMap(saved, settingsWith(4000, 4242))).toBe(true);
 	});
 
-	test("keeps quiet on a first start, when there is no map to replace", () => {
+	it("keeps quiet on a first start, when there is no map to replace", () => {
 		expect(replacesMap([], settingsWith(4000, 99))).toBe(false);
 	});
 
-	test("keeps the map when an older map sits beside the current one", () => {
+	it("keeps the map when an older map sits beside the current one", () => {
 		expect(
 			replacesMap(
 				[
@@ -121,7 +121,7 @@ describe("knowing when a start builds a brand new map", () => {
 });
 
 describe("telling the owner a new map is being generated", () => {
-	test("reports the new seed and size when they no longer match the saved map", async () => {
+	it("reports the new seed and size when they no longer match the saved map", async () => {
 		const { context, reported } = identityWith(saved);
 
 		await reportNewMap(context, settingsWith(4500, 777));
@@ -130,7 +130,7 @@ describe("telling the owner a new map is being generated", () => {
 			{
 				name: BridgeEventName.WorldCreated,
 				text: {
-					ar: "تغيّر السيد أو حجم الماب، والسيرفر بيبني ماب جديد (السيد 777، الحجم 4500)",
+					ar: "تغيّر السيد أو حجم الماب، ويُنشئ السيرفر ماب جديدة (السيد 777، الحجم 4500)",
 					en: "The seed or map size changed, the server is generating a new map (seed 777, size 4500)",
 				},
 				details: {
@@ -141,7 +141,7 @@ describe("telling the owner a new map is being generated", () => {
 		]);
 	});
 
-	test("reports nothing when the start keeps the saved map", async () => {
+	it("reports nothing when the start keeps the saved map", async () => {
 		const { context, reported } = identityWith(saved);
 
 		await reportNewMap(context, settingsWith(3000, 4242));
@@ -149,7 +149,7 @@ describe("telling the owner a new map is being generated", () => {
 		expect(reported).toEqual([]);
 	});
 
-	test("warns and lets the start go on when the identity folder cannot be listed", async () => {
+	it("warns and lets the start go on when the identity folder cannot be listed", async () => {
 		const { context, reported, warned } = identityWith(new Error("the listing hit its result limit"));
 
 		await reportNewMap(context, settingsWith(4500, 777));

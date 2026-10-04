@@ -30,15 +30,15 @@ const commands: Bridge.TerminalCommand[] = [
 	{
 		name: "playerlist",
 		summary: {
-			ar: "يعرض اللاعبين المتصلين الحين.",
+			ar: "يعرض اللاعبين المتصلين الآن.",
 			en: "List the players who are online.",
 		},
 	},
 	{
 		name: "server.save",
 		summary: {
-			ar: "يحفظ العالم على القرص.",
-			en: "Save the world to disk.",
+			ar: "يحفظ الماب على القرص.",
+			en: "Save the map to disk.",
 		},
 	},
 	{
@@ -51,7 +51,7 @@ const commands: Bridge.TerminalCommand[] = [
 	{
 		name: "kick",
 		summary: {
-			ar: "يطرد لاعب من السيرفر.",
+			ar: "يطرد لاعبًا من السيرفر.",
 			en: "Kick a player from the server.",
 		},
 		syntax: 'kick "<player>" "<reason>"',
@@ -62,7 +62,7 @@ const commands: Bridge.TerminalCommand[] = [
 	{
 		name: "ban",
 		summary: {
-			ar: "يحظر لاعب نهائيًا.",
+			ar: "يحظر لاعبًا نهائيًا.",
 			en: "Ban a player.",
 		},
 		syntax: 'ban "<player>" "<reason>"',
@@ -81,8 +81,8 @@ const commands: Bridge.TerminalCommand[] = [
 	{
 		name: "unban",
 		summary: {
-			ar: "يشيل الحظر عن رقم Steam.",
-			en: "Lift a ban from a Steam ID.",
+			ar: "يفك الحظر عن رقم Steam.",
+			en: "Unban a Steam ID.",
 		},
 		syntax: "unban <steamid>",
 	},
@@ -97,7 +97,7 @@ const commands: Bridge.TerminalCommand[] = [
 	{
 		name: "moderatorid",
 		summary: {
-			ar: "يعطي رقم Steam صلاحية مشرف.",
+			ar: "يعطي رقم Steam صلاحية مودريتر.",
 			en: "Give a Steam ID moderator rights.",
 		},
 		syntax: 'moderatorid <steamid> "<name>" "<reason>"',

@@ -31,8 +31,8 @@ export const lifecycle: Bridge.Lifecycle = {
 
 		if (!stamp) {
 			throw new BridgeUserError({
-				ar: "التثبيت ما خلص صح. أعد تشغيل سيرفرك عشان يعيد التثبيت.",
-				en: "The install did not finish cleanly. Restart your server to run it again.",
+				ar: "لم يكتمل التثبيت بشكل صحيح. نفّذ ريستارت لسيرفرك ليعيد التثبيت.",
+				en: "The install didn't finish cleanly. Restart your server to run it again.",
 			});
 		}
 

@@ -45,7 +45,16 @@ export const pendingWipe = async (context: Bridge.Context) => {
 
 export const wipeText = (kind: WipeKind, files: number): Bridge.Text => {
 	const count = {
-		ar: files === 1 ? "ملف واحد" : files === 2 ? "ملفين" : files <= 10 ? `${files} ملفات` : `${files} ملف`,
+		ar:
+			files === 1
+				? "ملف واحد"
+				: files === 2
+					? "ملفين"
+					: files % 100 >= 3 && files % 100 <= 10
+						? `${files} ملفات`
+						: files % 100 >= 11
+							? `${files} ملفًا`
+							: `${files} ملف`,
 		en: files === 1 ? "1 file" : `${files} files`,
 	};
 

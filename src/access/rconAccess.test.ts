@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { type Bridge, BridgeKind, BridgeUserError } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { RCON_ACCESS_VARIABLE, RCON_PASSWORD_LENGTH } from "@serverkgg/bridge/rcon";
@@ -50,11 +50,11 @@ const contextWith = (variables: Record<string, string> = {}) => {
 };
 
 describe("what the remote access card shows for rust", () => {
-	test("shows nothing before the install wrote the stamp", async () => {
+	it("shows nothing before the install wrote the stamp", async () => {
 		expect(await rconAccessPassword(contextWith().context)).toBeNull();
 	});
 
-	test("shows the password the running process was started with", async () => {
+	it("shows the password the running process was started with", async () => {
 		const { context } = contextWith();
 
 		await writeInstallStamp(context, {
@@ -69,7 +69,7 @@ describe("what the remote access card shows for rust", () => {
 		});
 	});
 
-	test("shows the rotated password as pending until the next start", async () => {
+	it("shows the rotated password as pending until the next start", async () => {
 		const { context } = contextWith();
 
 		await writeInstallStamp(context, {
@@ -86,11 +86,11 @@ describe("what the remote access card shows for rust", () => {
 });
 
 describe("rotating the rcon password", () => {
-	test("refuses before the install wrote the stamp", async () => {
+	it("refuses before the install wrote the stamp", async () => {
 		await expect(rotateRconPassword(contextWith().context)).rejects.toBeInstanceOf(BridgeUserError);
 	});
 
-	test("stores a fresh password beside the live one, which the running process keeps", async () => {
+	it("stores a fresh password beside the live one, which the running process keeps", async () => {
 		const { context } = contextWith();
 
 		await writeInstallStamp(context, {
@@ -108,7 +108,7 @@ describe("rotating the rcon password", () => {
 		expect(stamp?.buildId).toBe("1");
 	});
 
-	test("reports the rotation naming only the target, never the old or the new password", async () => {
+	it("reports the rotation naming only the target, never the old or the new password", async () => {
 		const { context, reported } = contextWith();
 
 		await writeInstallStamp(context, {
@@ -133,7 +133,7 @@ describe("rotating the rcon password", () => {
 		expect(serialized).not.toContain(stamp?.rconPasswordNext ?? "unreachable");
 	});
 
-	test("reports nothing when the rotation is refused", async () => {
+	it("reports nothing when the rotation is refused", async () => {
 		const { context, reported } = contextWith();
 
 		await expect(rotateRconPassword(context)).rejects.toBeInstanceOf(BridgeUserError);
@@ -143,11 +143,11 @@ describe("rotating the rcon password", () => {
 });
 
 describe("the remote access module the driver registers", () => {
-	test("is a detail module the panel card reads", () => {
+	it("is a detail module the panel card reads", () => {
 		expect(rconAccess.kind).toBe(BridgeKind.Detail);
 	});
 
-	test("names WebRCON and the published port on the card", async () => {
+	it("names WebRCON and the published port on the card", async () => {
 		const { context } = contextWith({
 			[RCON_ACCESS_VARIABLE]: "true",
 		});
@@ -168,7 +168,7 @@ describe("the remote access module the driver registers", () => {
 		]);
 	});
 
-	test("rotates through the module action without leaking the value into the log", async () => {
+	it("rotates through the module action without leaking the value into the log", async () => {
 		const { context, logged } = contextWith();
 
 		await writeInstallStamp(context, {

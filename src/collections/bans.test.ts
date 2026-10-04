@@ -1,4 +1,4 @@
-import { describe, expect, mock, test } from "bun:test";
+import { describe, expect, it, mock } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import * as webRcon from "../shared/webRcon";
@@ -55,7 +55,7 @@ const unban = async (context: Bridge.Context, row: Bridge.Row) => {
 };
 
 describe("telling the owner who was banned or unbanned from the bans table", () => {
-	test("reports a ban by steam id and keeps the ban event", async () => {
+	it("reports a ban by steam id and keeps the ban event", async () => {
 		const { context, reported, emitted } = recording();
 
 		await bans.add?.(context, STEAM_ID);
@@ -78,7 +78,7 @@ describe("telling the owner who was banned or unbanned from the bans table", () 
 		]);
 	});
 
-	test("reports an unban with the name the ban list kept", async () => {
+	it("reports an unban with the name the ban list kept", async () => {
 		const { context, reported } = recording();
 
 		await unban(context, {
@@ -102,7 +102,7 @@ describe("telling the owner who was banned or unbanned from the bans table", () 
 		]);
 	});
 
-	test("falls back to the steam id when the ban list kept no name", async () => {
+	it("falls back to the steam id when the ban list kept no name", async () => {
 		const { context, reported } = recording();
 
 		await unban(context, {
@@ -114,7 +114,7 @@ describe("telling the owner who was banned or unbanned from the bans table", () 
 		expect(reported.at(0)?.subject).toBe(STEAM_ID);
 	});
 
-	test("never puts the rcon password in what it reports", async () => {
+	it("never puts the rcon password in what it reports", async () => {
 		const { context, reported } = recording();
 
 		await bans.add?.(context, STEAM_ID);

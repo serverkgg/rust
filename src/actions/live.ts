@@ -14,7 +14,7 @@ export const live: Bridge.Actions = {
 			context.activity.report({
 				name: BridgeEventName.BroadcastSent,
 				text: {
-					ar: `تم إرسال رسالة للاعبين: «${activityExcerpt(message)}»`,
+					ar: `تم إرسال رسالة إلى اللاعبين: «${activityExcerpt(message)}»`,
 					en: `Sent a message to players: "${activityExcerpt(message)}"`,
 				},
 			});

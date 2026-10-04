@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { ANY_HOST, LOOPBACK_HOST } from "@serverkgg/bridge/rcon";
 import { RCON_HOST, type RustSettings, SERVER_IDENTITY } from "../shared";
 import { startCommand } from "./rustCommand";
@@ -32,7 +32,7 @@ const flagValue = (argv: string[], flag: string) => {
 };
 
 describe("building the command that starts rust", () => {
-	test("runs the dedicated server from the volume with no window", () => {
+	it("runs the dedicated server from the volume with no window", () => {
 		const argv = command();
 
 		expect(argv.at(0)).toBe("./RustDedicated");
@@ -40,14 +40,14 @@ describe("building the command that starts rust", () => {
 		expect(argv).toContain("-nographics");
 	});
 
-	test("takes no log file, so unity writes to stdout where the panel console reads", () => {
+	it("takes no log file, so unity writes to stdout where the panel console reads", () => {
 		const argv = command();
 
 		expect(argv).toContain("-logfile");
 		expect(argv.at(-1)).toBe("-logfile");
 	});
 
-	test("listens on every interface, on the ports the manifest allocated", () => {
+	it("listens on every interface, on the ports the manifest allocated", () => {
 		const argv = command();
 
 		expect(flagValue(argv, "+server.ip")).toBe("0.0.0.0");
@@ -55,7 +55,7 @@ describe("building the command that starts rust", () => {
 		expect(flagValue(argv, "+server.queryport")).toBe("28017");
 	});
 
-	test("honours the ports it was given rather than rust's defaults", () => {
+	it("honours the ports it was given rather than rust's defaults", () => {
 		const argv = startCommand({
 			gamePort: 28_061,
 			queryPort: 28_161,
@@ -69,7 +69,7 @@ describe("building the command that starts rust", () => {
 		expect(flagValue(argv, "+server.queryport")).toBe("28161");
 	});
 
-	test("keeps rcon on loopback while remote access is off, where only the driver reaches it", () => {
+	it("keeps rcon on loopback while remote access is off, where only the driver reaches it", () => {
 		const argv = command();
 
 		expect(flagValue(argv, "+rcon.ip")).toBe(LOOPBACK_HOST);
@@ -77,23 +77,23 @@ describe("building the command that starts rust", () => {
 		expect(flagValue(argv, "+rcon.password")).toBe("s3cret");
 	});
 
-	test("binds rcon to every interface when the panel opened remote access, so the published port answers", () => {
+	it("binds rcon to every interface when the panel opened remote access, so the published port answers", () => {
 		expect(flagValue(command({}, ANY_HOST), "+rcon.ip")).toBe(ANY_HOST);
 	});
 
-	test("keeps the driver's own loopback address inside the hosts rcon can bind", () => {
+	it("keeps the driver's own loopback address inside the hosts rcon can bind", () => {
 		expect(RCON_HOST).toBe(LOOPBACK_HOST);
 	});
 
-	test("turns on the websocket rcon the driver speaks", () => {
+	it("turns on the websocket rcon the driver speaks", () => {
 		expect(flagValue(command(), "+rcon.web")).toBe("1");
 	});
 
-	test("always uses the identity the manifest and the driver agree on", () => {
+	it("always uses the identity the manifest and the driver agree on", () => {
 		expect(flagValue(command(), "+server.identity")).toBe(SERVER_IDENTITY);
 	});
 
-	test("passes the settings a player saved in server.cfg", () => {
+	it("passes the settings a player saved in server.cfg", () => {
 		const argv = command();
 
 		expect(flagValue(argv, "+server.hostname")).toBe("My Server");
@@ -104,7 +104,7 @@ describe("building the command that starts rust", () => {
 		expect(flagValue(argv, "+server.saveinterval")).toBe("300");
 	});
 
-	test("writes pve as the word rust reads", () => {
+	it("writes pve as the word rust reads", () => {
 		expect(
 			flagValue(
 				command({
@@ -117,7 +117,7 @@ describe("building the command that starts rust", () => {
 		expect(flagValue(command(), "+server.pve")).toBe("false");
 	});
 
-	test("passes a name with spaces as one argument, so no quoting is needed", () => {
+	it("passes a name with spaces as one argument, so no quoting is needed", () => {
 		expect(
 			command({
 				hostname: 'the "best" server ever',
@@ -125,7 +125,7 @@ describe("building the command that starts rust", () => {
 		).toContain('the "best" server ever');
 	});
 
-	test("passes an empty description as an empty argument rather than dropping the flag", () => {
+	it("passes an empty description as an empty argument rather than dropping the flag", () => {
 		const argv = command({
 			description: "",
 		});
@@ -134,7 +134,7 @@ describe("building the command that starts rust", () => {
 		expect(flagValue(argv, "+server.description")).toBe("");
 	});
 
-	test("builds a fresh array each time, so one start cannot grow the next", () => {
+	it("builds a fresh array each time, so one start cannot grow the next", () => {
 		expect(command()).toEqual(command());
 	});
 });

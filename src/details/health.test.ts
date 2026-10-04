@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { BridgeDetailFormat, BridgeDetailTone } from "@serverkgg/bridge";
 import { parseServerHealth } from "../shared";
 import { formatUptime, fpsBadge, healthBadges, healthStats, LAG_FPS_THRESHOLD, SMOOTH_FPS_THRESHOLD } from "./health";
@@ -23,57 +23,57 @@ const statOf = (key: string) => {
 };
 
 describe("telling the player how smooth their server is running", () => {
-	test("calls a server at the smooth threshold smooth", () => {
+	it("calls a server at the smooth threshold smooth", () => {
 		expect(fpsBadge(SMOOTH_FPS_THRESHOLD).tone).toBe(BridgeDetailTone.Success);
 	});
 
-	test("warns about the frame rate rust starts stuttering at", () => {
+	it("warns about the frame rate rust starts stuttering at", () => {
 		expect(fpsBadge(LAG_FPS_THRESHOLD).tone).toBe(BridgeDetailTone.Warning);
 		expect(fpsBadge(SMOOTH_FPS_THRESHOLD - 1).tone).toBe(BridgeDetailTone.Warning);
 	});
 
-	test("calls anything below the lag threshold lagging", () => {
+	it("calls anything below the lag threshold lagging", () => {
 		expect(fpsBadge(LAG_FPS_THRESHOLD - 1).tone).toBe(BridgeDetailTone.Danger);
 		expect(fpsBadge(0).tone).toBe(BridgeDetailTone.Danger);
 	});
 });
 
 describe("saying how long the server has been up", () => {
-	test("reads hours and minutes together", () => {
+	it("reads hours and minutes together", () => {
 		expect(formatUptime(7860)).toEqual({
 			ar: "ساعتين و11 دقيقة",
 			en: "2h 11m",
 		});
 	});
 
-	test("drops the minutes on a whole hour", () => {
+	it("drops the minutes on a whole hour", () => {
 		expect(formatUptime(3600)).toEqual({
 			ar: "ساعة",
 			en: "1h",
 		});
 	});
 
-	test("drops the hours on a server that just started", () => {
+	it("drops the hours on a server that just started", () => {
 		expect(formatUptime(300)).toEqual({
-			ar: "5 دقايق",
+			ar: "5 دقائق",
 			en: "5m",
 		});
 	});
 
-	test("says less than a minute rather than zero", () => {
+	it("says less than a minute rather than zero", () => {
 		expect(formatUptime(12)).toEqual({
 			ar: "أقل من دقيقة",
 			en: "Less than a minute",
 		});
 	});
 
-	test("reads a negative uptime as less than a minute instead of a negative clock", () => {
+	it("reads a negative uptime as less than a minute instead of a negative clock", () => {
 		expect(formatUptime(-60).en).toBe("Less than a minute");
 	});
 });
 
 describe("building the health card from a serverinfo reply", () => {
-	test("badges the frame rate and the build rust reported", () => {
+	it("badges the frame rate and the build rust reported", () => {
 		expect(HEALTH === null ? [] : healthBadges(HEALTH)).toEqual([
 			{
 				label: {
@@ -92,7 +92,7 @@ describe("building the health card from a serverinfo reply", () => {
 		]);
 	});
 
-	test("shows the stats the overview card promises, in order", () => {
+	it("shows the stats the overview card promises, in order", () => {
 		expect(HEALTH === null ? [] : healthStats(HEALTH).map((stat) => stat.key)).toEqual([
 			"fps",
 			"entities",
@@ -103,21 +103,21 @@ describe("building the health card from a serverinfo reply", () => {
 		]);
 	});
 
-	test("counts the memory in bytes, because that is what the platform formats", () => {
+	it("counts the memory in bytes, because that is what the platform formats", () => {
 		expect(statOf("memory")?.value).toBe(4096 * 1_048_576);
 		expect(statOf("memory")?.format).toBe(BridgeDetailFormat.Bytes);
 	});
 
-	test("reads the online and max counts into one cell", () => {
+	it("reads the online and max counts into one cell", () => {
 		expect(statOf("players")?.value).toBe("12/50");
 	});
 
-	test("rounds the frame rate rust answered with as a float", () => {
+	it("rounds the frame rate rust answered with as a float", () => {
 		expect(statOf("fps")?.value).toBe(59);
 		expect(statOf("fps")?.format).toBe(BridgeDetailFormat.Number);
 	});
 
-	test("shows a dash rather than a zero for anything rust left out", () => {
+	it("shows a dash rather than a zero for anything rust left out", () => {
 		const missing = healthStats({
 			hostname: null,
 			map: null,
@@ -138,7 +138,7 @@ describe("building the health card from a serverinfo reply", () => {
 		}
 	});
 
-	test("badges nothing at all when rust reported neither frame rate nor build", () => {
+	it("badges nothing at all when rust reported neither frame rate nor build", () => {
 		expect(
 			healthBadges({
 				hostname: null,

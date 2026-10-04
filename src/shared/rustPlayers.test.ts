@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { parsePlayerList, parseServerHealth, parseServerInfo, presenceOf } from "./rustPlayers";
 
 const player = (overrides: Record<string, unknown> = {}) => {
@@ -18,7 +18,7 @@ const player = (overrides: Record<string, unknown> = {}) => {
 };
 
 describe("reading the roster rust answers playerlist with", () => {
-	test("reads a player into a row keyed by steam id", () => {
+	it("reads a player into a row keyed by steam id", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -37,11 +37,11 @@ describe("reading the roster rust answers playerlist with", () => {
 		]);
 	});
 
-	test("reads an empty server as an empty roster", () => {
+	it("reads an empty server as an empty roster", () => {
 		expect(parsePlayerList("[]")).toEqual([]);
 	});
 
-	test("reads a steam id rust sent as a number", () => {
+	it("reads a steam id rust sent as a number", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -53,7 +53,7 @@ describe("reading the roster rust answers playerlist with", () => {
 		).toBe("7656119800000001");
 	});
 
-	test("falls back to the steam id when a player has no display name", () => {
+	it("falls back to the steam id when a player has no display name", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -65,7 +65,7 @@ describe("reading the roster rust answers playerlist with", () => {
 		).toBe("76561198000000001");
 	});
 
-	test("drops an entry with no steam id, because no row can act on it", () => {
+	it("drops an entry with no steam id, because no row can act on it", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -78,7 +78,7 @@ describe("reading the roster rust answers playerlist with", () => {
 		).toHaveLength(1);
 	});
 
-	test("rounds a fractional ping, so the table shows a whole number", () => {
+	it("rounds a fractional ping, so the table shows a whole number", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -90,7 +90,7 @@ describe("reading the roster rust answers playerlist with", () => {
 		).toBe(43);
 	});
 
-	test("reports a missing ping as nothing rather than as zero", () => {
+	it("reports a missing ping as nothing rather than as zero", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -102,7 +102,7 @@ describe("reading the roster rust answers playerlist with", () => {
 		).toBeNull();
 	});
 
-	test("keeps arabic names intact", () => {
+	it("keeps arabic names intact", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -114,15 +114,15 @@ describe("reading the roster rust answers playerlist with", () => {
 		).toBe("مسلزي");
 	});
 
-	test("treats a truncated answer as an empty roster instead of throwing", () => {
+	it("treats a truncated answer as an empty roster instead of throwing", () => {
 		expect(parsePlayerList('[{"SteamID":"765611')).toEqual([]);
 	});
 
-	test("treats the plain-text error rust sends on a bad command as an empty roster", () => {
+	it("treats the plain-text error rust sends on a bad command as an empty roster", () => {
 		expect(parsePlayerList("Unknown Command: playerlist")).toEqual([]);
 	});
 
-	test("ignores anything in the array that is not a player object", () => {
+	it("ignores anything in the array that is not a player object", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -137,7 +137,7 @@ describe("reading the roster rust answers playerlist with", () => {
 });
 
 describe("reading the player count rust answers serverinfo with", () => {
-	test("reads the online and max counts the panel shows", () => {
+	it("reads the online and max counts the panel shows", () => {
 		expect(
 			parseServerInfo(
 				JSON.stringify({
@@ -154,7 +154,7 @@ describe("reading the player count rust answers serverinfo with", () => {
 		});
 	});
 
-	test("reads an empty server as zero online, not as unknown", () => {
+	it("reads an empty server as zero online, not as unknown", () => {
 		expect(
 			parseServerInfo(
 				JSON.stringify({
@@ -168,14 +168,14 @@ describe("reading the player count rust answers serverinfo with", () => {
 		});
 	});
 
-	test("reports unknown when rust answered with something that is not a count", () => {
+	it("reports unknown when rust answered with something that is not a count", () => {
 		expect(parseServerInfo("Unknown Command: serverinfo")).toEqual({
 			online: null,
 			max: null,
 		});
 	});
 
-	test("reports unknown for a field rust left out", () => {
+	it("reports unknown for a field rust left out", () => {
 		expect(
 			parseServerInfo(
 				JSON.stringify({
@@ -190,7 +190,7 @@ describe("reading the player count rust answers serverinfo with", () => {
 });
 
 describe("reading the level rust reports beside the player", () => {
-	test("reads the level the roster column shows", () => {
+	it("reads the level the roster column shows", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -200,7 +200,7 @@ describe("reading the level rust reports beside the player", () => {
 		).toBe(34);
 	});
 
-	test("reports a missing level as nothing rather than as zero", () => {
+	it("reports a missing level as nothing rather than as zero", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -212,7 +212,7 @@ describe("reading the level rust reports beside the player", () => {
 		).toBeNull();
 	});
 
-	test("rounds a fractional level, because rust reports it as a float", () => {
+	it("rounds a fractional level, because rust reports it as a float", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -224,7 +224,7 @@ describe("reading the level rust reports beside the player", () => {
 		).toBe(34);
 	});
 
-	test("leaves the avatar unresolved until the steam lookup fills it", () => {
+	it("leaves the avatar unresolved until the steam lookup fills it", () => {
 		expect(
 			parsePlayerList(
 				JSON.stringify([
@@ -245,7 +245,7 @@ const ENTRY = {
 };
 
 describe("sending the player data serverk.yml promises", () => {
-	test("carries the name, the steam id and every declared field", () => {
+	it("carries the name, the steam id and every declared field", () => {
 		expect(presenceOf(ENTRY)).toEqual({
 			player: "Meslzy",
 			steamId: "76561198000000001",
@@ -255,11 +255,11 @@ describe("sending the player data serverk.yml promises", () => {
 		});
 	});
 
-	test("names steam as the platform, because rust sells on nothing else", () => {
+	it("names steam as the platform, because rust sells on nothing else", () => {
 		expect(presenceOf(ENTRY).platform).toBe("Steam");
 	});
 
-	test("carries the avatar hash once the steam lookup has filled it", () => {
+	it("carries the avatar hash once the steam lookup has filled it", () => {
 		expect(
 			presenceOf({
 				...ENTRY,
@@ -268,7 +268,7 @@ describe("sending the player data serverk.yml promises", () => {
 		).toBe("a".repeat(40));
 	});
 
-	test("drops a field rust did not report rather than sending it empty", () => {
+	it("drops a field rust did not report rather than sending it empty", () => {
 		expect(
 			presenceOf({
 				...ENTRY,
@@ -306,7 +306,7 @@ const SERVER_INFO = {
 };
 
 describe("reading the health rust answers serverinfo with", () => {
-	test("reads every number the health card shows from a full reply", () => {
+	it("reads every number the health card shows from a full reply", () => {
 		expect(parseServerHealth(JSON.stringify(SERVER_INFO))).toEqual({
 			hostname: "Serverk Rust",
 			map: "Procedural Map",
@@ -322,7 +322,7 @@ describe("reading the health rust answers serverinfo with", () => {
 		});
 	});
 
-	test("reads a partial reply, leaving every key rust left out unknown", () => {
+	it("reads a partial reply, leaving every key rust left out unknown", () => {
 		expect(
 			parseServerHealth(
 				JSON.stringify({
@@ -345,19 +345,19 @@ describe("reading the health rust answers serverinfo with", () => {
 		});
 	});
 
-	test("reports nothing at all when rust answered with something that is not a reply", () => {
+	it("reports nothing at all when rust answered with something that is not a reply", () => {
 		expect(parseServerHealth("Unknown Command: serverinfo")).toBeNull();
 	});
 
-	test("reports nothing at all when the answer was cut off mid-frame", () => {
+	it("reports nothing at all when the answer was cut off mid-frame", () => {
 		expect(parseServerHealth('{"Players":1')).toBeNull();
 	});
 
-	test("refuses a json array, because serverinfo answers with one object", () => {
+	it("refuses a json array, because serverinfo answers with one object", () => {
 		expect(parseServerHealth("[]")).toBeNull();
 	});
 
-	test("falls back to the protocol when rust reported no build number", () => {
+	it("falls back to the protocol when rust reported no build number", () => {
 		expect(
 			parseServerHealth(
 				JSON.stringify({
@@ -368,7 +368,7 @@ describe("reading the health rust answers serverinfo with", () => {
 		).toBe("2551.235.1");
 	});
 
-	test("reads the player count the panel shows out of the same reply", () => {
+	it("reads the player count the panel shows out of the same reply", () => {
 		expect(parseServerInfo(JSON.stringify(SERVER_INFO))).toEqual({
 			online: 12,
 			max: 50,

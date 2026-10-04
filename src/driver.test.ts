@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { BridgeFormTarget, BridgeKind, BridgeLayout, BridgePlace, BridgeSetupStepKind } from "@serverkgg/bridge";
 import { GuideOpenTab } from "@serverkgg/bridge/guides";
 import { INSTALL_STAMP_FILE } from "@serverkgg/bridge/install";
@@ -134,7 +134,7 @@ const sectionOf = (tabId: string, sectionId: string) => {
 };
 
 describe("assembling the rust driver", () => {
-	test("declares every capability the panel and the platform depend on", () => {
+	it("declares every capability the panel and the platform depend on", () => {
 		expect(driver.install).toBeDefined();
 		expect(driver.lifecycle).toBeDefined();
 		expect(driver.events).toBeDefined();
@@ -145,7 +145,7 @@ describe("assembling the rust driver", () => {
 		expect(driver.panel).toBeDefined();
 	});
 
-	test("registers the settings, players, bans, live, wipes, health and remote access modules the tabs reference", () => {
+	it("registers the settings, players, bans, live, wipes, health and remote access modules the tabs reference", () => {
 		expect(Object.keys(modules)).toEqual([
 			"settings",
 			"players",
@@ -157,7 +157,7 @@ describe("assembling the rust driver", () => {
 		]);
 	});
 
-	test("registers every module the panel binds a section to", () => {
+	it("registers every module the panel binds a section to", () => {
 		for (const section of sections) {
 			if (section.layout !== BridgeLayout.Form) {
 				expect(Object.keys(modules)).toContain(section.module);
@@ -167,12 +167,12 @@ describe("assembling the rust driver", () => {
 });
 
 describe("declaring the events the platform is allowed to act on", () => {
-	test("raises every event from code, because rust's log carries none of them", () => {
+	it("raises every event from code, because rust's log carries none of them", () => {
 		expect(driver.events?.patterns).toEqual([]);
 		expect(driver.events?.emits?.length).toBeGreaterThan(0);
 	});
 
-	test("names only events the platform's taxonomy knows, so none are dropped", () => {
+	it("names only events the platform's taxonomy knows, so none are dropped", () => {
 		for (const name of driver.events?.emits ?? []) {
 			expect(isBridgeEventName(name)).toBe(true);
 		}
@@ -180,13 +180,13 @@ describe("declaring the events the platform is allowed to act on", () => {
 });
 
 describe("wiring the players table to the roster the collection returns", () => {
-	test("shows only columns the roster carries", () => {
+	it("shows only columns the roster carries", () => {
 		for (const key of columnsOf("players")) {
 			expect(ROSTER_KEYS).toContain(key);
 		}
 	});
 
-	test("shows the player, the level and the ping the panel promises", () => {
+	it("shows the player, the level and the ping the panel promises", () => {
 		expect(columnsOf("players")).toEqual([
 			"name",
 			"level",
@@ -196,7 +196,7 @@ describe("wiring the players table to the roster the collection returns", () => 
 });
 
 describe("naming the player a ban records", () => {
-	test("bans by steam id and records the name the roster carries", () => {
+	it("bans by steam id and records the name the roster carries", () => {
 		expect(
 			banCommand(
 				"76561198000000001",
@@ -208,7 +208,7 @@ describe("naming the player a ban records", () => {
 		).toBe('banid "76561198000000001" "Meslzy" "Banned by an admin."');
 	});
 
-	test("falls back to the steam id when the row carries no name, so the ban still reads back", () => {
+	it("falls back to the steam id when the row carries no name, so the ban still reads back", () => {
 		expect(
 			banCommand(
 				"76561198000000001",
@@ -222,19 +222,19 @@ describe("naming the player a ban records", () => {
 });
 
 describe("wiring the terminal autocomplete to the live roster", () => {
-	test("completes every argument from a module the driver actually registers", () => {
+	it("completes every argument from a module the driver actually registers", () => {
 		for (const arg of args) {
 			expect(Object.keys(modules)).toContain(arg.module ?? "");
 		}
 	});
 
-	test("completes every argument from a column that module's table shows", () => {
+	it("completes every argument from a column that module's table shows", () => {
 		for (const arg of args) {
 			expect(columnsOf(arg.module ?? "")).toContain(arg.column ?? "");
 		}
 	});
 
-	test("completes every argument from a field the roster really carries", () => {
+	it("completes every argument from a field the roster really carries", () => {
 		for (const arg of args) {
 			expect(ROSTER_KEYS).toContain(arg.column ?? "");
 		}
@@ -246,7 +246,7 @@ const playerPorts = manifest.container.ports.filter((port) => port.key !== RCON_
 const rconPort = manifest.container.ports.find((port) => port.key === RCON_ACCESS_PORT);
 
 describe("the manifest and the driver agreeing on the ports", () => {
-	test("declares the two player ports the start command reads back, then the remote access port", () => {
+	it("declares the two player ports the start command reads back, then the remote access port", () => {
 		expect(manifest.container.ports.map((port) => port.key)).toEqual([
 			"game",
 			"query",
@@ -254,13 +254,13 @@ describe("the manifest and the driver agreeing on the ports", () => {
 		]);
 	});
 
-	test("publishes both player ports over udp, which is all rust speaks to players", () => {
+	it("publishes both player ports over udp, which is all rust speaks to players", () => {
 		for (const port of playerPorts) {
 			expect(port.protocol).toBe("udp");
 		}
 	});
 
-	test("publishes the rcon port the driver binds, over tcp, only while the panel toggle is on", () => {
+	it("publishes the rcon port the driver binds, over tcp, only while the panel toggle is on", () => {
 		expect(rconPort?.containerPort).toBe(RCON_PORT);
 		expect(rconPort?.protocol).toBe("tcp");
 		expect(rconPort?.activeWhen).toEqual([
@@ -273,27 +273,27 @@ describe("the manifest and the driver agreeing on the ports", () => {
 		]);
 	});
 
-	test("never mirrors the rcon port, because the driver always dials the container port", () => {
+	it("never mirrors the rcon port, because the driver always dials the container port", () => {
 		expect(rconPort?.mirror ?? false).toBe(false);
 	});
 
-	test("declares every tcp container port once, so the rcon port collides with nothing", () => {
+	it("declares every tcp container port once, so the rcon port collides with nothing", () => {
 		const tcp = manifest.container.ports.filter((port) => port.protocol === "tcp").map((port) => port.containerPort);
 
 		expect(new Set(tcp).size).toBe(tcp.length);
 	});
 
-	test("declares the remote access toggle in a form, which is what validate demands of activeWhen", () => {
+	it("declares the remote access toggle in a form, which is what validate demands of activeWhen", () => {
 		expect(fieldKeys).toContain(RCON_ACCESS_VARIABLE);
 	});
 
-	test("mirrors both player ports, because rust announces the ports it bound to the steam master server", () => {
+	it("mirrors both player ports, because rust announces the ports it bound to the steam master server", () => {
 		for (const port of playerPorts) {
 			expect(port.mirror).toBe(true);
 		}
 	});
 
-	test("keeps the two host ranges apart, so one server never takes the other's port", () => {
+	it("keeps the two host ranges apart, so one server never takes the other's port", () => {
 		const [game, query] = manifest.container.ports;
 
 		expect(game?.hostRange.max).toBeLessThan(query?.hostRange.min ?? 0);
@@ -301,11 +301,11 @@ describe("the manifest and the driver agreeing on the ports", () => {
 });
 
 describe("declaring how the container is built and how long it is waited on", () => {
-	test("runs a linux payload, so the manifest declares no wine runtime", () => {
+	it("runs a linux payload, so the manifest declares no wine runtime", () => {
 		expect(manifest.container.runtime.platform).toBe("linux");
 	});
 
-	test("waits long enough for the steam download, which is the slowest thing a rust install does", () => {
+	it("waits long enough for the steam download, which is the slowest thing a rust install does", () => {
 		expect(manifest.container.runtime.installBudgetMinutes).toBeGreaterThanOrEqual(
 			manifest.container.runtime.bootBudgetMinutes,
 		);
@@ -313,16 +313,16 @@ describe("declaring how the container is built and how long it is waited on", ()
 });
 
 describe("the manifest guarding the files the driver depends on", () => {
-	test("protects the stamp the rcon password lives in", () => {
+	it("protects the stamp the rcon password lives in", () => {
 		expect(manifest.files.protected).toContain(INSTALL_STAMP_FILE);
 	});
 
-	test("hides the steam directories from the file manager, so nobody deletes them by hand", () => {
+	it("hides the steam directories from the file manager, so nobody deletes them by hand", () => {
 		expect(manifest.files.protected).toContain(STEAMCMD_DIRECTORY);
 		expect(manifest.files.protected).toContain(STEAM_DIRECTORY);
 	});
 
-	test("keeps the steam install through a reset, so a reset never re-downloads twenty gigabytes", () => {
+	it("keeps the steam install through a reset, so a reset never re-downloads twenty gigabytes", () => {
 		for (const path of [
 			STEAMCMD_DIRECTORY,
 			STEAM_DIRECTORY,
@@ -333,20 +333,20 @@ describe("the manifest guarding the files the driver depends on", () => {
 		}
 	});
 
-	test("protects the wipe marker, so nobody wipes a server by dropping a file", () => {
+	it("protects the wipe marker, so nobody wipes a server by dropping a file", () => {
 		expect(manifest.files.protected).toContain(WIPE_MARKER);
 	});
 
-	test("annotates the settings file the settings tab writes", () => {
+	it("annotates the settings file the settings tab writes", () => {
 		expect(manifest.files.notable.map((note) => note.match)).toContain(SERVER_CFG);
 	});
 
-	test("backs up the identity directory the settings and the save live in", () => {
+	it("backs up the identity directory the settings and the save live in", () => {
 		expect(manifest.backup.only).toContain(`server/**`);
 		expect(SERVER_CFG.startsWith(`server/${SERVER_IDENTITY}/`)).toBe(true);
 	});
 
-	test("archives neither the map nor its occlusion cache, because both rebuild from the seed", () => {
+	it("archives neither the map nor its occlusion cache, because both rebuild from the seed", () => {
 		const excluded = (path: string) => matchesAny(path, compileGlobs(manifest.backup.except));
 
 		expect(excluded(`${IDENTITY_DIRECTORY}/proceduralmap.3000.4242.221.map`)).toBe(true);
@@ -369,13 +369,13 @@ const fieldKeys = sections.flatMap((section) => {
 });
 
 describe("keeping every panel key inside what the wire protocol accepts", () => {
-	test("names no field with a character the agent's manifest schema rejects", () => {
+	it("names no field with a character the agent's manifest schema rejects", () => {
 		for (const key of fieldKeys) {
 			expect(key).toMatch(PANEL_KEY_PATTERN);
 		}
 	});
 
-	test("names no table column the wire would reject either", () => {
+	it("names no table column the wire would reject either", () => {
 		for (const table of tables) {
 			for (const column of table.columns) {
 				expect(column.key).toMatch(PANEL_KEY_PATTERN);
@@ -383,7 +383,7 @@ describe("keeping every panel key inside what the wire protocol accepts", () => 
 		}
 	});
 
-	test("declares a field for every settings key the driver maps", () => {
+	it("declares a field for every settings key the driver maps", () => {
 		for (const field of Object.keys(SETTING_FIELDS)) {
 			expect(fieldKeys).toContain(field);
 		}
@@ -400,7 +400,7 @@ const formSection = (tabId: string, sectionId: string) => {
 };
 
 describe("walking the customer through the first run", () => {
-	test("settles the map before the name, because the map is the choice that cannot be undone", () => {
+	it("settles the map before the name, because the map is the choice that cannot be undone", () => {
 		expect(steps.map((step) => step.id)).toEqual([
 			"world",
 			"name",
@@ -408,16 +408,16 @@ describe("walking the customer through the first run", () => {
 		]);
 	});
 
-	test("blocks nothing, because a fresh rust server already runs", () => {
+	it("blocks nothing, because a fresh rust server already runs", () => {
 		expect(steps.filter((step) => step.required !== false)).toEqual([]);
 	});
 
-	test("needs no driver step, so the setup declares no submit", () => {
+	it("needs no driver step, so the setup declares no submit", () => {
 		expect(steps.filter((step) => step.kind === BridgeSetupStepKind.Driver)).toEqual([]);
 		expect(driver.setup?.submit).toBeUndefined();
 	});
 
-	test("points every form step at a form section the panel really declares", () => {
+	it("points every form step at a form section the panel really declares", () => {
 		for (const step of steps) {
 			if (step.kind !== BridgeSetupStepKind.Form) {
 				continue;
@@ -427,7 +427,7 @@ describe("walking the customer through the first run", () => {
 		}
 	});
 
-	test("names only fields that section really carries", () => {
+	it("names only fields that section really carries", () => {
 		for (const step of steps) {
 			if (step.kind !== BridgeSetupStepKind.Form) {
 				continue;
@@ -441,13 +441,13 @@ describe("walking the customer through the first run", () => {
 		}
 	});
 
-	test("sends the invite step to the access page, where the address lives", () => {
+	it("sends the invite step to the access page, where the address lives", () => {
 		const invite = steps.find((step) => step.id === "invite");
 
 		expect(invite?.kind === BridgeSetupStepKind.Open && invite.target.tab).toBe(GuideOpenTab.Access);
 	});
 
-	test("titles and explains every step in both arabic and english", () => {
+	it("titles and explains every step in both arabic and english", () => {
 		for (const step of steps) {
 			expect(step.title.ar.length).toBeGreaterThan(0);
 			expect(step.title.en.length).toBeGreaterThan(0);
@@ -456,31 +456,31 @@ describe("walking the customer through the first run", () => {
 		}
 	});
 
-	test("keeps the setup singleton out of the panel modules, because its id is reserved", () => {
+	it("keeps the setup singleton out of the panel modules, because its id is reserved", () => {
 		expect(Object.keys(driver.modules ?? {})).not.toContain("setup");
 	});
 });
 
 describe("placing the roster and the ban list on the platform's players page", () => {
-	test("places every section of the players tab, so the tab leaves the sidebar", () => {
+	it("places every section of the players tab, so the tab leaves the sidebar", () => {
 		expect((tabOf("players")?.sections ?? []).map((section) => placeOf(section))).toEqual([
 			BridgePlace.Players,
 			BridgePlace.Players,
 		]);
 	});
 
-	test("keeps the players tab declared, because a guide still opens it by name", () => {
+	it("keeps the players tab declared, because a guide still opens it by name", () => {
 		expect(tabOf("players")).toBeDefined();
 	});
 
-	test("titles the roster tab the way every other game does", () => {
+	it("titles the roster tab the way every other game does", () => {
 		expect(tabOf("players")?.title).toEqual({
-			ar: "اللاعبين",
+			ar: "اللاعبون",
 			en: "Players",
 		});
 	});
 
-	test("offers the ban on a player who is no longer connected, and the kick only while they are", () => {
+	it("offers the ban on a player who is no longer connected, and the kick only while they are", () => {
 		const online = sectionOf("players", "online");
 		const actions = online !== undefined && "actions" in online ? (online.actions ?? []) : [];
 
@@ -488,13 +488,13 @@ describe("placing the roster and the ban list on the platform's players page", (
 		expect(actions.find((action) => action.id === "kick")?.offline).toBeUndefined();
 	});
 
-	test("shows only columns the ban list carries", () => {
+	it("shows only columns the ban list carries", () => {
 		for (const key of columnsOf("bans")) {
 			expect(BAN_KEYS).toContain(key);
 		}
 	});
 
-	test("shows the player, the steam id and the reason the ban was written with", () => {
+	it("shows the player, the steam id and the reason the ban was written with", () => {
 		expect(columnsOf("bans")).toEqual([
 			"name",
 			"id",
@@ -502,7 +502,7 @@ describe("placing the roster and the ban list on the platform's players page", (
 		]);
 	});
 
-	test("offers a box to ban a steam id that never joined", () => {
+	it("offers a box to ban a steam id that never joined", () => {
 		const section = sectionOf("players", "bans");
 
 		expect(section !== undefined && "add" in section ? section.add?.placeholder : undefined).toBe("7656119…");
@@ -513,18 +513,18 @@ describe("placing the roster and the ban list on the platform's players page", (
 describe("protecting the wipes with a recovery backup", () => {
 	const wipes = modules.wipes;
 
-	test("declares both wipes as protected, so the platform stores a recovery backup before either runs", () => {
+	it("declares both wipes as protected, so the platform stores a recovery backup before either runs", () => {
 		expect(wipes !== undefined && "protectedActions" in wipes ? wipes.protectedActions : undefined).toEqual([
 			"map",
 			"full",
 		]);
 	});
 
-	test("leaves requiresRunning off, which the bridge demands of a module with protected actions", () => {
+	it("leaves requiresRunning off, which the bridge demands of a module with protected actions", () => {
 		expect(wipes !== undefined && "requiresRunning" in wipes ? wipes.requiresRunning : undefined).toBeFalsy();
 	});
 
-	test("protects only actions the module really declares", () => {
+	it("protects only actions the module really declares", () => {
 		const declared = wipes !== undefined && wipes.kind === BridgeKind.Actions ? Object.keys(wipes.actions) : [];
 
 		for (const action of wipes !== undefined && "protectedActions" in wipes ? (wipes.protectedActions ?? []) : []) {
@@ -532,7 +532,7 @@ describe("protecting the wipes with a recovery backup", () => {
 		}
 	});
 
-	test("offers a button for every protected wipe", () => {
+	it("offers a button for every protected wipe", () => {
 		const section = sectionOf("controls", "wipe");
 		const buttons = section !== undefined && "actions" in section ? (section.actions ?? []) : [];
 
@@ -544,7 +544,7 @@ describe("protecting the wipes with a recovery backup", () => {
 });
 
 describe("explaining the roster and the health card", () => {
-	test("gives the online roster and the health card a help line in both languages", () => {
+	it("gives the online roster and the health card a help line in both languages", () => {
 		for (const [tab, id] of [
 			[
 				"players",
@@ -565,15 +565,15 @@ describe("explaining the roster and the health card", () => {
 });
 
 describe("placing the health card on the server overview", () => {
-	test("places the health detail on the overview, beside the platform's own live numbers", () => {
+	it("places the health detail on the overview, beside the platform's own live numbers", () => {
 		expect(placeOf(sectionOf("controls", "health"))).toBe(BridgePlace.Overview);
 	});
 
-	test("leads the controls tab with the health card", () => {
+	it("leads the controls tab with the health card", () => {
 		expect(tabOf("controls")?.sections.at(0)?.id).toBe("health");
 	});
 
-	test("leaves the rest of the controls tab on its own page", () => {
+	it("leaves the rest of the controls tab on its own page", () => {
 		expect(
 			(tabOf("controls")?.sections ?? []).filter((section) => placeOf(section) === undefined).length,
 		).toBeGreaterThan(0);
@@ -581,7 +581,7 @@ describe("placing the health card on the server overview", () => {
 });
 
 describe("explaining every settings form rust declares itself", () => {
-	test("says in one sentence what the form does, in both languages", () => {
+	it("says in one sentence what the form does, in both languages", () => {
 		for (const section of sections) {
 			if (section.layout !== BridgeLayout.Form || section.target !== BridgeFormTarget.Settings) {
 				continue;
@@ -594,23 +594,23 @@ describe("explaining every settings form rust declares itself", () => {
 });
 
 describe("the manifest and the driver agreeing on the presence payload", () => {
-	test("names the id key the roster rows are keyed by", () => {
+	it("names the id key the roster rows are keyed by", () => {
 		expect(manifest.presence.id).toBe("steamId");
 		expect(Object.keys(PRESENCE)).toContain(manifest.presence.id);
 	});
 
-	test("declares only fields the presence payload really carries", () => {
+	it("declares only fields the presence payload really carries", () => {
 		for (const field of manifest.presence.fields) {
 			expect(Object.keys(PRESENCE)).toContain(field.key);
 		}
 	});
 
-	test("builds the avatar url out of the hash the roster resolves", () => {
+	it("builds the avatar url out of the hash the roster resolves", () => {
 		expect(manifest.presence.avatar).toContain("{avatarHash}");
 		expect(Object.keys(PRESENCE)).toContain("avatarHash");
 	});
 
-	test("asks for the steam key the avatars need without ever requiring it", () => {
+	it("asks for the steam key the avatars need without ever requiring it", () => {
 		const secret = manifest.secrets.find((entry) => entry.key === "STEAM_WEB_API_KEY");
 
 		expect(secret).toBeDefined();

@@ -30,7 +30,7 @@ export const setup: Bridge.Setup = {
 				en: "Pick your map",
 			},
 			help: {
-				ar: "حجم الماب والسيد. قرّرهم من الحين، لأن تغييرهم بعدين يبني ماب جديدة وكل شي مبني يروح.",
+				ar: "حجم الماب والسيد. حدّدهما الآن، لأن تغييرهما لاحقًا يُنشئ ماب جديدة ويضيع كل ما بُني.",
 				en: "The map size and seed. Decide now, because changing them later builds a new map and everything built is gone.",
 			},
 		},
@@ -50,7 +50,7 @@ export const setup: Bridge.Setup = {
 				en: "Name your server",
 			},
 			help: {
-				ar: "الاسم والوصف اللي يطلعون في قائمة سيرفرات رست، وعدد اللاعبين.",
+				ar: "الاسم والوصف اللذان يظهران في قائمة سيرفرات رست، وعدد اللاعبين.",
 				en: "The name and description in the Rust server browser, and the player slots.",
 			},
 		},
@@ -62,12 +62,12 @@ export const setup: Bridge.Setup = {
 				tab: GuideOpenTab.Access,
 			},
 			title: {
-				ar: "عزّم أصحابك",
+				ar: "ادعُ أصحابك",
 				en: "Invite your friends",
 			},
 			help: {
-				ar: "انسخ عنوان سيرفرك وأرسله لأصحابك، يكتبون client.connect والعنوان في كونسول F1.",
-				en: "Copy your server address and send it to your friends; they type client.connect and the address in the F1 console.",
+				ar: "انسخ عنوان سيرفرك وأرسله لأصحابك، ليكتبوا client.connect ثم العنوان في كونسول F1.",
+				en: "Copy your server address and send it to your friends. They type client.connect and the address in the F1 console.",
 			},
 		},
 	],

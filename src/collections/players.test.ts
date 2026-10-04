@@ -1,4 +1,4 @@
-import { describe, expect, mock, test } from "bun:test";
+import { describe, expect, it, mock } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import * as webRcon from "../shared/webRcon";
@@ -62,7 +62,7 @@ const runAction = async (name: string, context: Bridge.Context) => {
 };
 
 describe("telling the owner who was kicked or banned from the players table", () => {
-	test("reports a kick with the player's name and steam id", async () => {
+	it("reports a kick with the player's name and steam id", async () => {
 		const { context, reported, emitted } = recording();
 
 		await runAction("kick", context);
@@ -85,7 +85,7 @@ describe("telling the owner who was kicked or banned from the players table", ()
 		]);
 	});
 
-	test("reports a ban with the player's name and steam id, and keeps the ban event", async () => {
+	it("reports a ban with the player's name and steam id, and keeps the ban event", async () => {
 		const { context, reported, emitted } = recording();
 
 		await runAction("ban", context);
@@ -100,7 +100,7 @@ describe("telling the owner who was kicked or banned from the players table", ()
 		expect(reported.at(0)?.details?.steamId).toBe("76561198000000001");
 	});
 
-	test("never puts the rcon password in what it reports", async () => {
+	it("never puts the rcon password in what it reports", async () => {
 		const { context, reported } = recording();
 
 		await runAction("kick", context);

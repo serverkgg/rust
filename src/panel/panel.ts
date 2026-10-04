@@ -31,8 +31,8 @@ import {
 } from "../shared";
 
 const NEW_MAP_WARNING: Bridge.Text = {
-	ar: "تغييرها يبني ماب جديدة كليًا بعد إعادة التشغيل — كل شيء مبني ينهدم. خذ نسخة احتياطية أول.",
-	en: "Changing this builds a brand new map on the next restart — everything built is gone. Take a backup first.",
+	ar: "تغييرها يُنشئ ماب جديدة كليًا بعد الريستارت، ويُهدم كل ما بُني فيها. خذ نسخة احتياطية أولًا.",
+	en: "Changing this builds a brand new map on the next restart, and everything built is gone. Take a backup first.",
 };
 
 const settingsTab: Bridge.Tab = {
@@ -49,7 +49,7 @@ const settingsTab: Bridge.Tab = {
 			target: BridgeFormTarget.Settings,
 			module: "settings",
 			help: {
-				ar: "هذي إعدادات سيرفرك الأساسية، وأي تعديل فيها يبي إعادة تشغيل عشان يشتغل.",
+				ar: "هذه إعدادات سيرفرك الأساسية، ويُطبَّق أي تعديل فيها بعد الريستارت.",
 				en: "These are your server's core settings, and every change needs a restart to take effect.",
 			},
 			restartHint: true,
@@ -62,7 +62,7 @@ const settingsTab: Bridge.Tab = {
 						en: "Server name",
 					},
 					help: {
-						ar: "الاسم اللي يظهر للاعبين في قائمة سيرفرات رست.",
+						ar: "الاسم الذي يظهر للاعبين في قائمة سيرفرات رست.",
 						en: "The name players see in the Rust server browser.",
 					},
 					maxLength: HOSTNAME_LENGTH,
@@ -75,7 +75,7 @@ const settingsTab: Bridge.Tab = {
 						en: "Server description",
 					},
 					help: {
-						ar: "يظهر للاعب لما يفتح سيرفرك من القائمة. اكتب فيه قوانينك ووقت الوايب.",
+						ar: "يظهر للاعب عند فتح سيرفرك من القائمة. اكتب فيه قوانينك وموعد الوايب.",
 						en: "Shown when a player opens your server in the browser. Put your rules and your wipe day in it.",
 					},
 					maxLength: DESCRIPTION_LENGTH,
@@ -88,8 +88,8 @@ const settingsTab: Bridge.Tab = {
 						en: "Max players",
 					},
 					help: {
-						ar: "كل لاعب ياكل رام. احسب 6 لاعبين لكل 1GB تقريبًا.",
-						en: "Every player costs RAM. Reckon on roughly 6 players per 1GB.",
+						ar: "كل لاعب يستهلك من الرام. احسب 6 لاعبين لكل 1GB تقريبًا.",
+						en: "Every player costs RAM. Plan on roughly 6 players per 1GB.",
 					},
 					min: MAX_PLAYERS_MIN,
 					max: MAX_PLAYERS_MAX,
@@ -99,11 +99,11 @@ const settingsTab: Bridge.Tab = {
 					control: BridgeControl.Number,
 					label: {
 						ar: "حجم الماب",
-						en: "World size",
+						en: "Map size",
 					},
 					help: {
-						ar: "بالمتر. 3000 هو الحجم المعتاد، وكل ما كبّرت زاد استهلاك الرام ووقت التحميل.",
-						en: "In metres. 3000 is the usual size — bigger means more RAM and a longer load.",
+						ar: "بالمتر. 3000 هو الحجم المعتاد، وكلما زاد الحجم زاد استهلاك الرام ووقت التحميل.",
+						en: "In meters. 3000 is the usual size, and bigger means more RAM and a longer load.",
 					},
 					warning: NEW_MAP_WARNING,
 					min: WORLD_SIZE_MIN,
@@ -118,7 +118,7 @@ const settingsTab: Bridge.Tab = {
 						en: "Map seed",
 					},
 					help: {
-						ar: "الرقم اللي تتولد منه الماب. نفس السيد مع نفس الحجم يعطيك نفس الماب دايم.",
+						ar: "الرقم الذي تُنشأ منه الماب. السيد نفسه مع الحجم نفسه يعطي الماب نفسها دائمًا.",
 						en: "The number the map is generated from. The same seed with the same size always gives the same map.",
 					},
 					warning: NEW_MAP_WARNING,
@@ -133,20 +133,20 @@ const settingsTab: Bridge.Tab = {
 						en: "PvE mode",
 					},
 					help: {
-						ar: "لما تفعّله، ما يقدر اللاعبين يأذون بعض. رست الأصلي PvP، فخله مطفّي إذا تبي التجربة الطبيعية.",
-						en: "When on, players cannot hurt each other. Rust is a PvP game — leave it off for the normal experience.",
+						ar: "عند تفعيله، لا يستطيع اللاعبون إيذاء بعضهم. رست في الأصل لعبة PvP، فأبقِه موقوفًا إذا أردت التجربة الطبيعية.",
+						en: "When on, players can't hurt each other. Rust is a PvP game, so leave it off for the normal experience.",
 					},
 				},
 				{
 					key: SAVE_INTERVAL_FIELD,
 					control: BridgeControl.Number,
 					label: {
-						ar: "كل كم يحفظ (بالثواني)",
+						ar: "فترة الحفظ (بالثواني)",
 						en: "Save interval (seconds)",
 					},
 					help: {
-						ar: "كل ما قلّلته قلّ اللي يضيع لو تعطّل السيرفر، وزاد اللاق لحظة الحفظ.",
-						en: "Lower loses less when the server goes down, and costs a hitch every time it saves.",
+						ar: "كلما قلّلته قلّ ما يضيع إذا تعطّل السيرفر، وزاد اللاق لحظة الحفظ.",
+						en: "Lower loses less if the server crashes, and causes a short hitch every time it saves.",
 					},
 					min: SAVE_INTERVAL_MIN,
 					max: SAVE_INTERVAL_MAX,
@@ -160,7 +160,7 @@ const settingsTab: Bridge.Tab = {
 const playersTab: Bridge.Tab = {
 	id: "players",
 	title: {
-		ar: "اللاعبين",
+		ar: "اللاعبون",
 		en: "Players",
 	},
 	icon: BridgeIcon.Users,
@@ -169,8 +169,8 @@ const playersTab: Bridge.Tab = {
 			layout: BridgeLayout.Table,
 			id: "online",
 			help: {
-				ar: "كل اللي داخلين سيرفرك الحين، ومن نفس السطر تطرده أو تحظره.",
-				en: "Everyone on your server right now, and the same row is where you kick or ban them.",
+				ar: "كل اللاعبين الموجودين في سيرفرك الآن، ومن السطر نفسه تطرد اللاعب أو تحظره.",
+				en: "Everyone on your server right now. Kick or ban anyone from their row.",
 			},
 			place: BridgePlace.Players,
 			module: "players",
@@ -201,7 +201,7 @@ const playersTab: Bridge.Tab = {
 				{
 					id: "kick",
 					label: {
-						ar: "طرد",
+						ar: "اطرد",
 						en: "Kick",
 					},
 					confirm: BridgeConfirm.Normal,
@@ -209,7 +209,7 @@ const playersTab: Bridge.Tab = {
 				{
 					id: "ban",
 					label: {
-						ar: "حظر",
+						ar: "احظر",
 						en: "Ban",
 					},
 					confirm: BridgeConfirm.Strong,
@@ -217,7 +217,7 @@ const playersTab: Bridge.Tab = {
 				},
 			],
 			empty: {
-				ar: "ما فيه أحد داخل الحين.",
+				ar: "لا يوجد لاعبون متصلون الآن.",
 				en: "Nobody is online right now.",
 			},
 		},
@@ -225,12 +225,12 @@ const playersTab: Bridge.Tab = {
 			layout: BridgeLayout.Table,
 			id: "bans",
 			title: {
-				ar: "المحظورين",
+				ar: "المحظورون",
 				en: "Banned players",
 			},
 			help: {
-				ar: "كل واحد محظور من سيرفرك، ومن نفس السطر ترفع عنه الحظر.",
-				en: "Everyone banned from your server, and the same row is where you lift it.",
+				ar: "كل اللاعبين المحظورين من سيرفرك، ومن السطر نفسه تفك الحظر عنهم.",
+				en: "Everyone banned from your server. Unban anyone from their row.",
 			},
 			place: BridgePlace.Players,
 			module: "bans",
@@ -259,7 +259,7 @@ const playersTab: Bridge.Tab = {
 			],
 			add: {
 				label: {
-					ar: "احظر بالمعرّف",
+					ar: "احظر برقم Steam",
 					en: "Ban by Steam ID",
 				},
 				placeholder: "7656119…",
@@ -268,15 +268,15 @@ const playersTab: Bridge.Tab = {
 				{
 					id: "remove",
 					label: {
-						ar: "رفع الحظر",
+						ar: "فك الحظر",
 						en: "Unban",
 					},
 					confirm: BridgeConfirm.Normal,
 				},
 			],
 			empty: {
-				ar: "ما فيه أحد محظور من سيرفرك. أي واحد تحظره من جدول اللاعبين بيطلع لك هنا.",
-				en: "Nobody is banned from your server. Whoever you ban from the roster lands here.",
+				ar: "لا يوجد لاعبون محظورون من سيرفرك. يظهر هنا كل لاعب تحظره من جدول اللاعبين.",
+				en: "Nobody is banned from your server. Anyone you ban from the player list shows up here.",
 			},
 		},
 	],
@@ -298,14 +298,14 @@ const controlsTab: Bridge.Tab = {
 				en: "Server health",
 			},
 			help: {
-				ar: "أداء سيرفرك وهو شغّال: الإطارات، الرام، الكيانات، واللاعبين، وتتحدث كل 20 ثانية.",
+				ar: "أداء سيرفرك أثناء تشغيله: الإطارات، والرام، والكيانات، واللاعبون، وتتحدث كل 20 ثانية.",
 				en: "How your server is running: FPS, memory, entities and players, refreshed every 20 seconds.",
 			},
 			place: BridgePlace.Overview,
 			module: "health",
 			empty: {
-				ar: "ما قدرنا نوصل لسيرفرك الحين. شغّله وخلّه دقيقة، وبتطلع لك الأرقام هنا.",
-				en: "We could not reach your server right now. Start it, give it a minute, and the numbers land here.",
+				ar: "تعذّر الوصول إلى سيرفرك الآن. شغّله وعطه دقيقة، وستظهر الأرقام هنا.",
+				en: "We couldn't reach your server right now. Start it, give it a minute, and the numbers show up here.",
 			},
 		},
 		{
@@ -316,7 +316,7 @@ const controlsTab: Bridge.Tab = {
 				en: "Quick actions",
 			},
 			help: {
-				ar: "تشتغل على طول على سيرفرك الشغّال.",
+				ar: "تُنفَّذ فورًا على سيرفرك الشغّال.",
 				en: "These run on your server right away.",
 			},
 			module: "live",
@@ -336,7 +336,7 @@ const controlsTab: Bridge.Tab = {
 								en: "Message",
 							},
 							help: {
-								ar: "توصل لكل اللي داخلين الحين في الشات.",
+								ar: "تصل إلى كل اللاعبين المتصلين الآن في الشات.",
 								en: "Reaches everyone on the server right now, in chat.",
 							},
 							maxLength: ANNOUNCE_MESSAGE_LENGTH,
@@ -346,8 +346,8 @@ const controlsTab: Bridge.Tab = {
 				{
 					id: "save",
 					label: {
-						ar: "احفظ العالم",
-						en: "Save the world",
+						ar: "احفظ الماب",
+						en: "Save the map",
 					},
 				},
 			],
@@ -360,8 +360,8 @@ const controlsTab: Bridge.Tab = {
 				en: "Wipe",
 			},
 			help: {
-				ar: "في الوايب نوقف سيرفرك، وناخذ نسخة احتياطية بنفسنا، ونمسح، ونرجّعه بماب جديدة بس إذا كان شغّال. ولو غيّرت رأيك، النسخة ترجّع كل شيء.",
-				en: "For a wipe we stop your server, take a backup ourselves, clear it, and bring it back on a new map only if it was running. Change your mind and that backup puts everything back.",
+				ar: "عند الوايب نوقف سيرفرك، ونأخذ نسخة احتياطية بأنفسنا، ونحذف البيانات، ثم نعيده بماب جديدة إذا كان شغّالًا فقط. وإذا غيّرت رأيك، تعيد النسخة الاحتياطية كل شيء.",
+				en: "For a wipe we stop your server, take a backup ourselves, clear it, and bring it back on a new map only if it was running. If you change your mind, that backup puts everything back.",
 			},
 			module: "wipes",
 			actions: [
@@ -373,7 +373,7 @@ const controlsTab: Bridge.Tab = {
 					},
 					confirm: BridgeConfirm.Strong,
 					confirmText: {
-						ar: "بنمسح الماب وكل شيء مبني عليها ونبني ماب جديدة. البلوبرنتات اللي فتحها اللاعبين تبقى معهم. نوقف سيرفرك أول وناخذ نسخة احتياطية، وبعد الوايب يرجع لحاله بس إذا كان شغّال.",
+						ar: "سيتم حذف الماب وكل ما بُني عليها، وإنشاء ماب جديدة. تبقى البلوبرنتات التي فتحها اللاعبون معهم. نوقف سيرفرك أولًا ونأخذ نسخة احتياطية، وبعد الوايب يعود تلقائيًا إذا كان شغّالًا فقط.",
 						en: "The map and everything built on it are deleted and a new map is generated. The blueprints players unlocked stay with them. We stop your server first and take a backup, and after the wipe it comes back on its own only if it was running.",
 					},
 				},
@@ -385,7 +385,7 @@ const controlsTab: Bridge.Tab = {
 					},
 					confirm: BridgeConfirm.Strong,
 					confirmText: {
-						ar: "بنمسح الماب وكل شيء مبني عليها والبلوبرنتات وبيانات اللاعبين كلها. الكل يبدأ من الصفر. نوقف سيرفرك أول وناخذ نسخة احتياطية، وبعد الوايب يرجع لحاله بس إذا كان شغّال.",
+						ar: "سيتم حذف الماب وكل ما بُني عليها، والبلوبرنتات، وكل بيانات اللاعبين. يبدأ الجميع من الصفر. نوقف سيرفرك أولًا ونأخذ نسخة احتياطية، وبعد الوايب يعود تلقائيًا إذا كان شغّالًا فقط.",
 						en: "The map, everything built on it, the blueprints and all the player data are deleted. Everyone starts from zero. We stop your server first and take a backup, and after the wipe it comes back on its own only if it was running.",
 					},
 				},

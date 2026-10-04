@@ -1,18 +1,18 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { PVE_KEY, SEED_KEY, SETTING_DEFAULTS } from "../shared";
 import { seedPatch } from "./seedConfig";
 
 const SEED = 4242;
 
 describe("seeding the settings a brand new server starts with", () => {
-	test("writes every default plus a seed when the file is empty", () => {
+	it("writes every default plus a seed when the file is empty", () => {
 		expect(seedPatch({}, SEED)).toEqual({
 			...SETTING_DEFAULTS,
 			[SEED_KEY]: SEED,
 		});
 	});
 
-	test("writes nothing at all on a server that is already set up", () => {
+	it("writes nothing at all on a server that is already set up", () => {
 		expect(
 			seedPatch(
 				{
@@ -24,7 +24,7 @@ describe("seeding the settings a brand new server starts with", () => {
 		).toEqual({});
 	});
 
-	test("never overwrites a value a player chose, so reinstalling keeps their map", () => {
+	it("never overwrites a value a player chose, so reinstalling keeps their map", () => {
 		expect(
 			seedPatch(
 				{
@@ -35,7 +35,7 @@ describe("seeding the settings a brand new server starts with", () => {
 		).toBeUndefined();
 	});
 
-	test("keeps a setting a player deliberately turned off", () => {
+	it("keeps a setting a player deliberately turned off", () => {
 		expect(
 			seedPatch(
 				{
@@ -46,7 +46,7 @@ describe("seeding the settings a brand new server starts with", () => {
 		).toBeUndefined();
 	});
 
-	test("fills only the settings that are missing", () => {
+	it("fills only the settings that are missing", () => {
 		expect(
 			Object.keys(
 				seedPatch(
@@ -61,7 +61,7 @@ describe("seeding the settings a brand new server starts with", () => {
 		]);
 	});
 
-	test("gives every server its own map by seeding a seed", () => {
+	it("gives every server its own map by seeding a seed", () => {
 		expect(seedPatch({}, SEED)[SEED_KEY]).toBe(SEED);
 	});
 });

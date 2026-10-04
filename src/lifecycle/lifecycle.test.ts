@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { INSTALL_STAMP_FILE } from "@serverkgg/bridge/install";
 import { lifecycle } from "./lifecycle";
@@ -73,7 +73,7 @@ const bootingWith = (list: () => Promise<Bridge.FileEntry[]>) => {
 };
 
 describe("starting rust when the new map check cannot run", () => {
-	test("still builds the start command when the identity folder cannot be listed", async () => {
+	it("still builds the start command when the identity folder cannot be listed", async () => {
 		const { context, reported, warned } = bootingWith(async () => {
 			throw new Error("the listing hit its scan limit");
 		});
@@ -86,7 +86,7 @@ describe("starting rust when the new map check cannot run", () => {
 		expect(warned).toHaveLength(1);
 	});
 
-	test("builds the start command and reports the new map when the seed changed", async () => {
+	it("builds the start command and reports the new map when the seed changed", async () => {
 		const { context, reported } = bootingWith(async () => {
 			return [
 				{

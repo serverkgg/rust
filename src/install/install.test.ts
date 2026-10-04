@@ -1,4 +1,4 @@
-import { describe, expect, mock, test } from "bun:test";
+import { describe, expect, it, mock } from "bun:test";
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import * as steam from "@serverkgg/bridge/steam";
@@ -85,7 +85,7 @@ const reset = (build: string | null, missing: string[] = []) => {
 };
 
 describe("telling the owner what the install did", () => {
-	test("reports the first install with the build it landed on", async () => {
+	it("reports the first install with the build it landed on", async () => {
 		reset("19000001");
 
 		const { context, reported } = serverWith();
@@ -106,7 +106,7 @@ describe("telling the owner what the install did", () => {
 		]);
 	});
 
-	test("emits the plain server updated event for telemetry and reports the update as activity beside it", async () => {
+	it("emits the plain server updated event for telemetry and reports the update as activity beside it", async () => {
 		reset("19000002");
 
 		const { context, reported, emitted } = serverWith();
@@ -144,7 +144,7 @@ describe("telling the owner what the install did", () => {
 		expect(JSON.stringify(reported)).not.toContain("rcon-password-that-never-leaves");
 	});
 
-	test("reports nothing when steam has no newer build", async () => {
+	it("reports nothing when steam has no newer build", async () => {
 		reset("19000001");
 
 		const { context, reported, emitted } = serverWith();
@@ -161,7 +161,7 @@ describe("telling the owner what the install did", () => {
 		expect(reported).toEqual([]);
 	});
 
-	test("never puts the generated rcon password in the install report", async () => {
+	it("never puts the generated rcon password in the install report", async () => {
 		reset("19000001");
 
 		const { context, reported } = serverWith();
@@ -176,7 +176,7 @@ describe("telling the owner what the install did", () => {
 });
 
 describe("failing an install whose download left the game incomplete", () => {
-	test("tells the owner to retry and keeps the missing folder for staff", async () => {
+	it("tells the owner to retry and keeps the missing folder for staff", async () => {
 		reset("19000001", [
 			"RustDedicated_Data",
 		]);

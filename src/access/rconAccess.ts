@@ -7,7 +7,7 @@ import { RCON_PROTOCOL, readInstallStamp, writeInstallStamp } from "../shared";
 const RCON_TARGET = "rcon";
 
 const NOT_GENERATED: Bridge.Text = {
-	ar: "شغّل سيرفرك مرة عشان تتولد كلمة المرور.",
+	ar: "شغّل سيرفرك مرة واحدة لتُنشأ كلمة المرور.",
 	en: "Start your server once to generate the password.",
 };
 
@@ -39,7 +39,7 @@ export const rotateRconPassword = async (context: Bridge.Context) => {
 	context.activity.report({
 		name: BridgeEventName.SecretRotated,
 		text: {
-			ar: `تم تغيير كلمة مرور ${RCON_PROTOCOL.ar}، والتغيير ينطبق مع التشغيل الجاي`,
+			ar: `تم تغيير كلمة مرور ${RCON_PROTOCOL.ar}، ويُطبَّق التغيير في التشغيل القادم`,
 			en: `Changed the ${RCON_PROTOCOL.en} password, takes effect on the next start`,
 		},
 		subject: RCON_PROTOCOL.en,
@@ -54,7 +54,7 @@ export const rconAccess = createRconAccess({
 	password: rconAccessPassword,
 	rotate: rotateRconPassword,
 	tools: {
-		ar: "RustAdmin وBattleMetrics يتصلون بسيرفرك على WebRCON.",
+		ar: "يتصل RustAdmin و BattleMetrics بسيرفرك عبر WebRCON.",
 		en: "RustAdmin and BattleMetrics connect over WebRCON.",
 	},
 });

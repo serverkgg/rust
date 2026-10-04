@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import type { Bridge } from "@serverkgg/bridge";
 import { SERVER_CFG } from "./rustApp";
 import {
@@ -46,7 +46,7 @@ const contextWith = (options: { stored?: Bridge.Values; reads?: string[]; merges
 };
 
 describe("reaching server.cfg through the codec rust's config format has", () => {
-	test("reads the convars out of the identity's server.cfg", async () => {
+	it("reads the convars out of the identity's server.cfg", async () => {
 		const reads: string[] = [];
 
 		expect(
@@ -67,11 +67,11 @@ describe("reaching server.cfg through the codec rust's config format has", () =>
 		]);
 	});
 
-	test("reads a server that has never been started as no settings at all", async () => {
+	it("reads a server that has never been started as no settings at all", async () => {
 		expect(await readSettings(contextWith({}))).toEqual({});
 	});
 
-	test("writes a change back into the same file, leaving the rest of it to the codec", async () => {
+	it("writes a change back into the same file, leaving the rest of it to the codec", async () => {
 		const merges: Merge[] = [];
 
 		await mergeSettings(
@@ -95,7 +95,7 @@ describe("reaching server.cfg through the codec rust's config format has", () =>
 });
 
 describe("mapping the panel's fields onto rust's convars", () => {
-	test("reads every declared field back from the convars server.cfg holds", () => {
+	it("reads every declared field back from the convars server.cfg holds", () => {
 		expect(
 			fieldValues({
 				[HOSTNAME_KEY]: "My Server",
@@ -109,15 +109,15 @@ describe("mapping the panel's fields onto rust's convars", () => {
 		});
 	});
 
-	test("answers with every field the form declares, even the ones the file has not got", () => {
+	it("answers with every field the form declares, even the ones the file has not got", () => {
 		expect(Object.keys(fieldValues({})).sort()).toEqual(Object.keys(SETTING_FIELDS).sort());
 	});
 
-	test("reports a setting the file never had as empty rather than as missing", () => {
+	it("reports a setting the file never had as empty rather than as missing", () => {
 		expect(fieldValues({})[HOSTNAME_FIELD]).toBeNull();
 	});
 
-	test("writes a submitted field back to the convar rust reads", () => {
+	it("writes a submitted field back to the convar rust reads", () => {
 		expect(
 			convarValues({
 				[HOSTNAME_FIELD]: "My Server",
@@ -129,7 +129,7 @@ describe("mapping the panel's fields onto rust's convars", () => {
 		});
 	});
 
-	test("drops anything the form does not declare, so nothing stray reaches server.cfg", () => {
+	it("drops anything the form does not declare, so nothing stray reaches server.cfg", () => {
 		expect(
 			convarValues({
 				"rcon.password": "leaked",
@@ -140,7 +140,7 @@ describe("mapping the panel's fields onto rust's convars", () => {
 		});
 	});
 
-	test("round-trips a full form submission through the convars and back", () => {
+	it("round-trips a full form submission through the convars and back", () => {
 		const submitted = fieldValues({
 			[HOSTNAME_KEY]: "My Server",
 			[SEED_KEY]: 4242,
@@ -152,7 +152,7 @@ describe("mapping the panel's fields onto rust's convars", () => {
 });
 
 describe("resolving the values the start command is built from", () => {
-	test("falls back to a sane default for every setting the file is missing", () => {
+	it("falls back to a sane default for every setting the file is missing", () => {
 		expect(settingsOf({}, 777)).toEqual({
 			hostname: "Serverk Rust",
 			description: "",
@@ -164,7 +164,7 @@ describe("resolving the values the start command is built from", () => {
 		});
 	});
 
-	test("clamps a world size a player pushed past what rust accepts", () => {
+	it("clamps a world size a player pushed past what rust accepts", () => {
 		expect(
 			settingsOf(
 				{
@@ -175,7 +175,7 @@ describe("resolving the values the start command is built from", () => {
 		).toBe(6000);
 	});
 
-	test("clamps a world size below rust's floor", () => {
+	it("clamps a world size below rust's floor", () => {
 		expect(
 			settingsOf(
 				{
@@ -186,7 +186,7 @@ describe("resolving the values the start command is built from", () => {
 		).toBe(1000);
 	});
 
-	test("reads a boolean the codec left as text", () => {
+	it("reads a boolean the codec left as text", () => {
 		expect(
 			settingsOf(
 				{
@@ -197,7 +197,7 @@ describe("resolving the values the start command is built from", () => {
 		).toBe(true);
 	});
 
-	test("ignores a number a player typed as words and keeps the default", () => {
+	it("ignores a number a player typed as words and keeps the default", () => {
 		expect(
 			settingsOf(
 				{
@@ -208,7 +208,7 @@ describe("resolving the values the start command is built from", () => {
 		).toBe(50);
 	});
 
-	test("keeps the seed already in the file rather than the generated one", () => {
+	it("keeps the seed already in the file rather than the generated one", () => {
 		expect(
 			settingsOf(
 				{
@@ -221,28 +221,28 @@ describe("resolving the values the start command is built from", () => {
 });
 
 describe("reading a number out of a config file a player edited", () => {
-	test("falls back rather than reading an absent value as zero", () => {
+	it("falls back rather than reading an absent value as zero", () => {
 		expect(numberOf(null, 300, 60, 3600)).toBe(300);
 	});
 
-	test("falls back on a value a player blanked out", () => {
+	it("falls back on a value a player blanked out", () => {
 		expect(numberOf("", 300, 60, 3600)).toBe(300);
 		expect(numberOf("   ", 300, 60, 3600)).toBe(300);
 	});
 
-	test("falls back on a boolean, which is never a count", () => {
+	it("falls back on a boolean, which is never a count", () => {
 		expect(numberOf(true, 300, 60, 3600)).toBe(300);
 	});
 
-	test("reads a real zero the player typed and clamps it to the floor", () => {
+	it("reads a real zero the player typed and clamps it to the floor", () => {
 		expect(numberOf(0, 300, 60, 3600)).toBe(60);
 	});
 
-	test("reads a number the codec left as text", () => {
+	it("reads a number the codec left as text", () => {
 		expect(numberOf("900", 300, 60, 3600)).toBe(900);
 	});
 
-	test("rounds a fraction, because rust takes whole numbers", () => {
+	it("rounds a fraction, because rust takes whole numbers", () => {
 		expect(numberOf(900.6, 300, 60, 3600)).toBe(901);
 	});
 });

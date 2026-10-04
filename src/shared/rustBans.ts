@@ -43,8 +43,8 @@ export const requireSteamId = (input: string) => {
 
 	if (!STEAM_ID_PATTERN.test(steamId)) {
 		throw new BridgeUserError({
-			ar: "هذا مو رقم Steam. الرقم 17 خانة ويبدأ بـ 7656 — مثال: 76561198000000001",
-			en: "That is not a Steam ID. It is 17 digits starting with 7656 — like 76561198000000001.",
+			ar: "هذا ليس رقم Steam. الرقم من 17 خانة ويبدأ بـ 7656، مثل 76561198000000001.",
+			en: "That isn't a Steam ID. It's 17 digits starting with 7656, like 76561198000000001.",
 		});
 	}
 

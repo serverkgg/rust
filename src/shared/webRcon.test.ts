@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
 import {
 	createWebRcon,
@@ -11,7 +11,7 @@ import {
 } from "./webRcon";
 
 describe("encoding a command for rust's web rcon", () => {
-	test("sends the three fields facepunch's web rcon expects", () => {
+	it("sends the three fields facepunch's web rcon expects", () => {
 		expect(JSON.parse(encodeRconFrame(7, "serverinfo"))).toEqual({
 			Identifier: 7,
 			Message: "serverinfo",
@@ -19,17 +19,17 @@ describe("encoding a command for rust's web rcon", () => {
 		});
 	});
 
-	test("keeps the quotes inside a command intact", () => {
+	it("keeps the quotes inside a command intact", () => {
 		expect(JSON.parse(encodeRconFrame(1, 'say "hello there"')).Message).toBe('say "hello there"');
 	});
 
-	test("keeps arabic in an announcement intact", () => {
+	it("keeps arabic in an announcement intact", () => {
 		expect(JSON.parse(encodeRconFrame(1, 'say "السيرفر بيقفل"')).Message).toBe('say "السيرفر بيقفل"');
 	});
 });
 
 describe("decoding what rust's web rcon answers", () => {
-	test("reads the identifier and the message back", () => {
+	it("reads the identifier and the message back", () => {
 		expect(
 			decodeRconFrame(
 				JSON.stringify({
@@ -46,7 +46,7 @@ describe("decoding what rust's web rcon answers", () => {
 		});
 	});
 
-	test("reads a frame with no type, because rust does not always send one", () => {
+	it("reads a frame with no type, because rust does not always send one", () => {
 		expect(
 			decodeRconFrame(
 				JSON.stringify({
@@ -61,7 +61,7 @@ describe("decoding what rust's web rcon answers", () => {
 		});
 	});
 
-	test("reads an empty message rather than dropping the reply", () => {
+	it("reads an empty message rather than dropping the reply", () => {
 		expect(
 			decodeRconFrame(
 				JSON.stringify({
@@ -71,7 +71,7 @@ describe("decoding what rust's web rcon answers", () => {
 		).toBe("");
 	});
 
-	test("drops a frame with no identifier, which is rust's own console chatter", () => {
+	it("drops a frame with no identifier, which is rust's own console chatter", () => {
 		expect(
 			decodeRconFrame(
 				JSON.stringify({
@@ -82,7 +82,7 @@ describe("decoding what rust's web rcon answers", () => {
 		).toBeNull();
 	});
 
-	test("drops a frame whose identifier is not a number", () => {
+	it("drops a frame whose identifier is not a number", () => {
 		expect(
 			decodeRconFrame(
 				JSON.stringify({
@@ -93,11 +93,11 @@ describe("decoding what rust's web rcon answers", () => {
 		).toBeNull();
 	});
 
-	test("treats a truncated frame as no reply instead of throwing", () => {
+	it("treats a truncated frame as no reply instead of throwing", () => {
 		expect(decodeRconFrame('{"Identifier": 7, "Mess')).toBeNull();
 	});
 
-	test("treats json that is not an object as no reply", () => {
+	it("treats json that is not an object as no reply", () => {
 		for (const raw of [
 			"null",
 			"42",
@@ -110,25 +110,25 @@ describe("decoding what rust's web rcon answers", () => {
 });
 
 describe("addressing the rcon of a running server", () => {
-	test("talks to loopback only, never to a published port", () => {
+	it("talks to loopback only, never to a published port", () => {
 		expect(rconUrl("secret")).toBe(`ws://127.0.0.1:${RCON_PORT}/secret`);
 	});
 
-	test("escapes a password that carries a slash, so the path stays one segment", () => {
+	it("escapes a password that carries a slash, so the path stays one segment", () => {
 		expect(rconUrl("a/b")).toBe(`ws://127.0.0.1:${RCON_PORT}/a%2Fb`);
 	});
 
-	test("uses the port it was given", () => {
+	it("uses the port it was given", () => {
 		expect(rconUrl("secret", 30_000)).toBe("ws://127.0.0.1:30000/secret");
 	});
 });
 
 describe("numbering the commands the driver sends", () => {
-	test("never repeats the identifier of the command before it", () => {
+	it("never repeats the identifier of the command before it", () => {
 		expect(nextIdentifier()).not.toBe(nextIdentifier());
 	});
 
-	test("stays a positive number, which rust echoes back unchanged", () => {
+	it("stays a positive number, which rust echoes back unchanged", () => {
 		expect(nextIdentifier()).toBeGreaterThan(0);
 	});
 });
@@ -249,7 +249,7 @@ const withServer = async (
 };
 
 describe("keeping one socket open to rust's web rcon", () => {
-	test("sends two commands over the same socket and matches each reply to its command", async () => {
+	it("sends two commands over the same socket and matches each reply to its command", async () => {
 		await withServer(async (rust, context) => {
 			const rcon = createWebRcon({
 				port: rust.port,
@@ -265,7 +265,7 @@ describe("keeping one socket open to rust's web rcon", () => {
 		});
 	});
 
-	test("ignores a frame carrying another identifier, which is rust's own console chatter", async () => {
+	it("ignores a frame carrying another identifier, which is rust's own console chatter", async () => {
 		await withServer(async (rust, context) => {
 			const rcon = createWebRcon({
 				port: rust.port,
@@ -279,7 +279,7 @@ describe("keeping one socket open to rust's web rcon", () => {
 		});
 	});
 
-	test("reopens the socket on the next command after the server closed it", async () => {
+	it("reopens the socket on the next command after the server closed it", async () => {
 		await withServer(async (rust, context) => {
 			const rcon = createWebRcon({
 				port: rust.port,
@@ -298,7 +298,7 @@ describe("keeping one socket open to rust's web rcon", () => {
 		});
 	});
 
-	test("gives up on a command nothing answers, and keeps the socket for the next one", async () => {
+	it("gives up on a command nothing answers, and keeps the socket for the next one", async () => {
 		await withServer(async (rust, context) => {
 			const rcon = createWebRcon({
 				port: rust.port,
@@ -315,7 +315,7 @@ describe("keeping one socket open to rust's web rcon", () => {
 		});
 	});
 
-	test("fires commands without waiting for a reply, over the same socket", async () => {
+	it("fires commands without waiting for a reply, over the same socket", async () => {
 		await withServer(async (rust, context) => {
 			const rcon = createWebRcon({
 				port: rust.port,
@@ -335,7 +335,7 @@ describe("keeping one socket open to rust's web rcon", () => {
 		});
 	});
 
-	test("dials again after release, which is what a stop and a start do", async () => {
+	it("dials again after release, which is what a stop and a start do", async () => {
 		await withServer(async (rust, context) => {
 			const rcon = createWebRcon({
 				port: rust.port,
@@ -354,7 +354,7 @@ describe("keeping one socket open to rust's web rcon", () => {
 		});
 	});
 
-	test("dials again with the new password once the stamp changes", async () => {
+	it("dials again with the new password once the stamp changes", async () => {
 		await withServer(
 			async (rust, context) => {
 				const rcon = createWebRcon({
@@ -376,7 +376,7 @@ describe("keeping one socket open to rust's web rcon", () => {
 		);
 	});
 
-	test("reports the server as unreachable when nothing listens", async () => {
+	it("reports the server as unreachable when nothing listens", async () => {
 		const rust = fakeRust();
 		const port = rust.port;
 
@@ -401,7 +401,7 @@ describe("keeping one socket open to rust's web rcon", () => {
 		}
 	});
 
-	test("reports the server as unreachable when the stamp has no password yet", async () => {
+	it("reports the server as unreachable when the stamp has no password yet", async () => {
 		await withServer(async (rust) => {
 			const rcon = createWebRcon({
 				port: rust.port,
