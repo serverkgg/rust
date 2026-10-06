@@ -212,7 +212,7 @@ const playersTab: Bridge.Tab = {
 						ar: "احظر",
 						en: "Ban",
 					},
-					confirm: BridgeConfirm.Strong,
+					confirm: BridgeConfirm.Normal,
 					offline: true,
 				},
 			],
