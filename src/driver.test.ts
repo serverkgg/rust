@@ -317,9 +317,9 @@ describe("the manifest guarding the files the driver depends on", () => {
 		expect(manifest.files.protected).toContain(INSTALL_STAMP_FILE);
 	});
 
-	it("hides the steam directories from the file manager, so nobody deletes them by hand", () => {
-		expect(manifest.files.protected).toContain(STEAMCMD_DIRECTORY);
-		expect(manifest.files.protected).toContain(STEAM_DIRECTORY);
+	it("leaves the steam directories to the customer, since steamcmd validates them on the next install", () => {
+		expect(manifest.files.protected).not.toContain(STEAMCMD_DIRECTORY);
+		expect(manifest.files.protected).not.toContain(STEAM_DIRECTORY);
 	});
 
 	it("keeps the steam install through a reset, so a reset never re-downloads twenty gigabytes", () => {

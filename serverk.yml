@@ -131,12 +131,6 @@ presence:
 
 files:
   protected:
-    - .steamcmd
-    - .steam
-    - steamapps
-    - Bundles
-    - RustDedicated
-    - RustDedicated_Data
     - .serverk-install.json
     - .serverk-wipe
   notable:
