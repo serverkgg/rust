@@ -40,7 +40,7 @@ export const replacesMap = (paths: string[], settings: RustSettings) => {
 
 export const newMapText = (settings: RustSettings): Bridge.Text => {
 	return {
-		ar: `تغيّر السيد أو حجم الماب، ويُنشئ السيرفر ماب جديدة (السيد ${settings.seed}، الحجم ${settings.worldSize})`,
+		ar: `تغيّر السيد أو حجم الماب، ويُنشئ السيرفر مابًا جديدًا (السيد ${settings.seed}، الحجم ${settings.worldSize})`,
 		en: `The seed or map size changed, the server is generating a new map (seed ${settings.seed}, size ${settings.worldSize})`,
 	};
 };

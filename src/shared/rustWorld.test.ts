@@ -130,7 +130,7 @@ describe("telling the owner a new map is being generated", () => {
 			{
 				name: BridgeEventName.WorldCreated,
 				text: {
-					ar: "تغيّر السيد أو حجم الماب، ويُنشئ السيرفر ماب جديدة (السيد 777، الحجم 4500)",
+					ar: "تغيّر السيد أو حجم الماب، ويُنشئ السيرفر مابًا جديدًا (السيد 777، الحجم 4500)",
 					en: "The seed or map size changed, the server is generating a new map (seed 777, size 4500)",
 				},
 				details: {

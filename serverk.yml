@@ -8,7 +8,7 @@ metadata:
     ar: رست
     en: Rust
   description:
-    ar: سيرفر رست في ماب مفتوحة وقاسية، تبدأ فيها بحجر وتنتهي بقاعدة محصّنة. اجمع الموارد، وابنِ بيتك، وكوّن فريقًا مع أصحابك، وأغيروا على قواعد غيركم. السيد وحجم الماب والوايب كلها تحت تحكمك من اللوحة.
+    ar: سيرفر رست في ماب مفتوح وقاسٍ، تبدأ فيه بحجر وتنتهي بقاعدة محصّنة. اجمع الموارد، وابنِ بيتك، وكوّن فريقًا مع أصحابك، وأغيروا على قواعد غيركم. السيد وحجم الماب والوايب كلها تحت تحكمك من اللوحة.
     en: Rust dedicated servers in a harsh open world, where you start with a rock and end with a fortified base. Gather, build, team up with your friends and raid everyone else. The seed, the map size and the wipe are all yours to control from the panel.
   tagline:
     ar: ابنِ قاعدتك ودافع عنها وأغِر على غيرك، وسيرفرك جاهز خلال دقيقة
@@ -16,6 +16,9 @@ metadata:
   category: survival
   logo: assets/logo.webp
   banner: assets/banner.webp
+
+steam:
+  appId: 258550
 
 resources:
   minMemoryMb: 8192
@@ -171,7 +174,7 @@ files:
       icon: map
       color: "#5ba32b"
       note:
-        ar: الماب وكل ما بُني فيها وبيانات اللاعبين. لا تعدّل عليها والسيرفر شغّال، وخذ نسخة احتياطية قبل أي تعديل.
+        ar: الماب وكل ما بُني فيه وبيانات اللاعبين. لا تعدّل عليها والسيرفر شغّال، وخذ نسخة احتياطية قبل أي تعديل.
         en: The map, everything built on it and the player data. Don't touch it while the server runs, and take a backup first.
 
 guideTags:

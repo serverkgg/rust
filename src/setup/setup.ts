@@ -30,7 +30,7 @@ export const setup: Bridge.Setup = {
 				en: "Pick your map",
 			},
 			help: {
-				ar: "حجم الماب والسيد. حدّدهما الآن، لأن تغييرهما لاحقًا يُنشئ ماب جديدة ويضيع كل ما بُني.",
+				ar: "حجم الماب والسيد. حدّدهما الآن، لأن تغييرهما لاحقًا يُنشئ مابًا جديدًا ويضيع كل ما بُني.",
 				en: "The map size and seed. Decide now, because changing them later builds a new map and everything built is gone.",
 			},
 		},

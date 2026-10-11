@@ -31,7 +31,7 @@ import {
 } from "../shared";
 
 const NEW_MAP_WARNING: Bridge.Text = {
-	ar: "تغييرها يُنشئ ماب جديدة كليًا بعد الريستارت، ويُهدم كل ما بُني فيها. خذ نسخة احتياطية أولًا.",
+	ar: "تغييرها يُنشئ مابًا جديدًا كليًا بعد الريستارت، ويُهدم كل ما بُني فيه. خذ نسخة احتياطية أولًا.",
 	en: "Changing this builds a brand new map on the next restart, and everything built is gone. Take a backup first.",
 };
 
@@ -118,7 +118,7 @@ const settingsTab: Bridge.Tab = {
 						en: "Map seed",
 					},
 					help: {
-						ar: "الرقم الذي تُنشأ منه الماب. السيد نفسه مع الحجم نفسه يعطي الماب نفسها دائمًا.",
+						ar: "الرقم الذي يُنشأ منه الماب. السيد نفسه مع الحجم نفسه يعطي الماب نفسه دائمًا.",
 						en: "The number the map is generated from. The same seed with the same size always gives the same map.",
 					},
 					warning: NEW_MAP_WARNING,
@@ -360,7 +360,7 @@ const controlsTab: Bridge.Tab = {
 				en: "Wipe",
 			},
 			help: {
-				ar: "عند الوايب نوقف سيرفرك، ونأخذ نسخة احتياطية بأنفسنا، ونحذف البيانات، ثم نعيده بماب جديدة إذا كان شغّالًا فقط. وإذا غيّرت رأيك، تعيد النسخة الاحتياطية كل شيء.",
+				ar: "عند الوايب نوقف سيرفرك، ونأخذ نسخة احتياطية بأنفسنا، ونحذف البيانات، ثم نعيده بماب جديد إذا كان شغّالًا فقط. وإذا غيّرت رأيك، تعيد النسخة الاحتياطية كل شيء.",
 				en: "For a wipe we stop your server, take a backup ourselves, clear it, and bring it back on a new map only if it was running. If you change your mind, that backup puts everything back.",
 			},
 			module: "wipes",
@@ -373,7 +373,7 @@ const controlsTab: Bridge.Tab = {
 					},
 					confirm: BridgeConfirm.Strong,
 					confirmText: {
-						ar: "سيتم حذف الماب وكل ما بُني عليها، وإنشاء ماب جديدة. تبقى البلوبرنتات التي فتحها اللاعبون معهم. نوقف سيرفرك أولًا ونأخذ نسخة احتياطية، وبعد الوايب يعود تلقائيًا إذا كان شغّالًا فقط.",
+						ar: "سيتم حذف الماب وكل ما بُني عليه، وإنشاء ماب جديد. تبقى البلوبرنتات التي فتحها اللاعبون معهم. نوقف سيرفرك أولًا ونأخذ نسخة احتياطية، وبعد الوايب يعود تلقائيًا إذا كان شغّالًا فقط.",
 						en: "The map and everything built on it are deleted and a new map is generated. The blueprints players unlocked stay with them. We stop your server first and take a backup, and after the wipe it comes back on its own only if it was running.",
 					},
 				},
@@ -385,7 +385,7 @@ const controlsTab: Bridge.Tab = {
 					},
 					confirm: BridgeConfirm.Strong,
 					confirmText: {
-						ar: "سيتم حذف الماب وكل ما بُني عليها، والبلوبرنتات، وكل بيانات اللاعبين. يبدأ الجميع من الصفر. نوقف سيرفرك أولًا ونأخذ نسخة احتياطية، وبعد الوايب يعود تلقائيًا إذا كان شغّالًا فقط.",
+						ar: "سيتم حذف الماب وكل ما بُني عليه، والبلوبرنتات، وكل بيانات اللاعبين. يبدأ الجميع من الصفر. نوقف سيرفرك أولًا ونأخذ نسخة احتياطية، وبعد الوايب يعود تلقائيًا إذا كان شغّالًا فقط.",
 						en: "The map, everything built on it, the blueprints and all the player data are deleted. Everyone starts from zero. We stop your server first and take a backup, and after the wipe it comes back on its own only if it was running.",
 					},
 				},
