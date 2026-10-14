@@ -3,7 +3,7 @@ import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import { RCON_PASSWORD_LENGTH } from "@serverkgg/bridge/rcon";
 import { createSteamcmd, installedBuildId, missingGameRoots } from "@serverkgg/bridge/steam";
 import { generateToken } from "@serverkgg/bridge/utils";
-import { GAME_ROOTS, readInstallStamp, STEAM_APP_ID, writeInstallStamp } from "../shared";
+import { CARBON_DELETED_DEPOT_FILES, GAME_ROOTS, readInstallStamp, STEAM_APP_ID, writeInstallStamp } from "../shared";
 import { seedConfig } from "./seedConfig";
 
 const LABEL = "rust";
@@ -39,6 +39,7 @@ export const install: Bridge.Install = {
 	async run(context) {
 		const stamp = await readInstallStamp(context);
 		const fresh = (await missingGameRoots(context, GAME_ROOTS)).length > 0;
+		const cleaned = await missingGameRoots(context, CARBON_DELETED_DEPOT_FILES);
 		const steamcmd = steamcmdOf(context);
 
 		await steamcmd.prepare();
@@ -50,8 +51,14 @@ export const install: Bridge.Install = {
 			},
 		);
 
+		if (!fresh && cleaned.length > 0) {
+			context.log("steam files carbon deletes on boot are missing, validating so the next build can apply", {
+				missing: cleaned.join(", "),
+			});
+		}
+
 		await steamcmd.update({
-			validate: fresh,
+			validate: fresh || cleaned.length > 0,
 		});
 
 		const missing = await missingGameRoots(context, GAME_ROOTS);

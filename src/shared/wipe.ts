@@ -71,12 +71,14 @@ export const wipeText = (kind: WipeKind, files: number): Bridge.Text => {
 	};
 };
 
-export const applyWipe = async (context: Bridge.Context, kind: WipeKind) => {
+export const listIdentityFiles = async (context: Bridge.Context) => {
 	const entries = await context.files.list(`${IDENTITY_DIRECTORY}/*`);
-	const targets = wipeTargets(
-		entries.filter((entry) => !entry.directory).map((entry) => entry.path),
-		kind,
-	);
+
+	return entries.filter((entry) => !entry.directory).map((entry) => entry.path);
+};
+
+export const applyWipe = async (context: Bridge.Context, kind: WipeKind) => {
+	const targets = wipeTargets(await listIdentityFiles(context), kind);
 
 	for (const target of targets) {
 		await context.files.remove(target);

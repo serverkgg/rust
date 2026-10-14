@@ -524,6 +524,10 @@ describe("protecting the wipes with a recovery backup", () => {
 		expect(wipes !== undefined && "requiresRunning" in wipes ? wipes.requiresRunning : undefined).toBeFalsy();
 	});
 
+	it("says when a wipe is unavailable, so the panel asks before the platform stops the game", () => {
+		expect(wipes !== undefined && "unavailable" in wipes ? typeof wipes.unavailable : undefined).toBe("function");
+	});
+
 	it("protects only actions the module really declares", () => {
 		const declared = wipes !== undefined && wipes.kind === BridgeKind.Actions ? Object.keys(wipes.actions) : [];
 

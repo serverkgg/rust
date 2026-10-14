@@ -2,12 +2,14 @@ import { describe, expect, it, mock } from "bun:test";
 import { type Bridge, BridgeUserError } from "@serverkgg/bridge";
 import { BridgeEventName } from "@serverkgg/bridge/protocol";
 import * as steam from "@serverkgg/bridge/steam";
-import { readInstallStamp, writeInstallStamp } from "../shared";
+import { CARBON_DELETED_DEPOT_FILES, GAME_ROOTS, readInstallStamp, writeInstallStamp } from "../shared";
 import * as seedConfigModule from "./seedConfig";
 
 const game = {
 	build: "19000001" as string | null,
 	missing: [] as string[],
+	restores: false,
+	updates: [] as steam.SteamcmdUpdateOptions[],
 };
 
 mock.module("@serverkgg/bridge/steam", () => {
@@ -16,15 +18,21 @@ mock.module("@serverkgg/bridge/steam", () => {
 		createSteamcmd() {
 			return {
 				async prepare() {},
-				async update() {},
+				async update(options: steam.SteamcmdUpdateOptions) {
+					game.updates.push(options);
+
+					if (game.restores) {
+						game.missing = [];
+					}
+				},
 				async linkSteamClient() {},
 				async buildId() {
 					return game.build;
 				},
 			};
 		},
-		async missingGameRoots() {
-			return game.missing;
+		async missingGameRoots(_context: Bridge.Context, roots: string[]) {
+			return roots.filter((root) => game.missing.includes(root));
 		},
 	};
 });
@@ -82,6 +90,8 @@ const serverWith = () => {
 const reset = (build: string | null, missing: string[] = []) => {
 	game.build = build;
 	game.missing = missing;
+	game.restores = false;
+	game.updates = [];
 };
 
 describe("telling the owner what the install did", () => {
@@ -188,5 +198,60 @@ describe("failing an install whose download left the game incomplete", () => {
 		expect(failure instanceof BridgeUserError ? failure.text : null).toEqual(FILES_MISSING);
 		expect(failure instanceof Error ? String(failure.cause) : "").toContain("RustDedicated_Data");
 		expect(reported).toEqual([]);
+	});
+});
+
+describe("choosing when the steam update validates", () => {
+	it("keeps the cheap update on a server whose steam files are all there", async () => {
+		reset("19000001");
+
+		const { context } = serverWith();
+
+		await install.run(context);
+
+		expect(game.updates).toEqual([
+			{
+				validate: false,
+			},
+		]);
+	});
+
+	it("validates when carbon deleted a steam file on boot, because steam cancels an update that reads a missing file", async () => {
+		for (const file of CARBON_DELETED_DEPOT_FILES) {
+			reset("19000001", [
+				file,
+			]);
+
+			game.restores = true;
+
+			const { context } = serverWith();
+
+			await install.run(context);
+
+			expect(game.updates).toEqual([
+				{
+					validate: true,
+				},
+			]);
+		}
+	});
+
+	it("validates the first download", async () => {
+		reset("19000001", [
+			...GAME_ROOTS,
+			...CARBON_DELETED_DEPOT_FILES,
+		]);
+
+		game.restores = true;
+
+		const { context } = serverWith();
+
+		await install.run(context);
+
+		expect(game.updates).toEqual([
+			{
+				validate: true,
+			},
+		]);
 	});
 });
