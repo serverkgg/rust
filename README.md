@@ -1,42 +1,52 @@
+![Rust](assets/banner.webp)
+
 # رست (Rust)
 
-حزمة رست على منصة سيرفرك (`serverk.gg`). هذا المستودع فيه كل شيء اللعبة تحتاجه عشان تشتغل على المنصة: ملف التعريف `serverk.yml`، الـ driver اللي يدير السيرفر، صورة الدوكر، والشروحات.
+يضم هذا الريبو كل ما تحتاجه منصة سيرفرك لتشغيل سيرفرات رست. سيرفر رست في ماب مفتوح وقاسٍ، تبدأ فيه بحجر وتنتهي بقاعدة محصّنة. اجمع الموارد، وابنِ بيتك، وكوّن فريقًا مع أصحابك، وأغيروا على قواعد غيركم. السيد وحجم الماب والوايب كلها تحت تحكمك من اللوحة. ابنِ قاعدتك ودافع عنها وأغِر على غيرك، وسيرفرك جاهز خلال دقيقة. صفحة اللعبة: [serverk.gg/games/rust](https://serverk.gg/games/rust)
 
-The Rust game package for the Serverk platform (`serverk.gg`). This repo holds everything the game needs to run on the platform: the `serverk.yml` manifest, the driver that manages the server, the Docker image, and the guides.
+This repository holds everything Serverk needs to run Rust servers. Rust dedicated servers in a harsh open world, where you start with a rock and end with a fortified base. Gather, build, team up with your friends and raid everyone else. The seed, the map size and the wipe are all yours to control from the panel. Build your base, defend it, raid the rest, on a server ready in a minute. Game page: [serverk.gg/games/rust](https://serverk.gg/games/rust)
 
 ## Layout
 
-- `serverk.yml` — the game manifest: metadata, resources, ports, backup rules, guides.
-- `src/` — the bridge driver: install (SteamCMD), lifecycle, the WebRCON control channel, query, backup, and the panel modules. The driver keeps one WebSocket to `rcon.port` on loopback for the whole run, matching replies to commands by identifier, and drops it on stop and before every start. The same password is what the remote-access card shows: `rcon.ip` binds every interface only while the panel toggle is on, and a rotation waits in the install stamp until the next start.
-- `image/Dockerfile` — the runtime image; the compiled bridge binary is its entrypoint.
-- `assets/` — logo and banner (webp).
-- `guides/` — player guides in Arabic and English.
+- `serverk.yml`: the game manifest with its metadata, resources, ports, backup and reset rules, and the guide list.
+- `serverk.schema.json`: the JSON Schema of `serverk.yml` for the editor, written by `serverk-bridge schema`.
+- `src/`: the driver, built on `@serverkgg/bridge`; `src/driver.ts` exports it and `src/main.ts` serves it.
+- `image/Dockerfile`: the container image, with the compiled bridge as its entrypoint.
+- `assets/`: the logo and the banner the site and the panel show.
+- `guides/<id>/ar.md` and `en.md`: the guide bodies; each guide's title, summary and tags live in `serverk.yml`.
+
+## Guides
+
+- [البدء بسيرفرك · Getting started](https://serverk.gg/games/rust/guides/getting-started)
+- [متى تعمل وايب وكيف · When and how to wipe](https://serverk.gg/games/rust/guides/wipes)
 
 ## Develop
 
-Everything runs on [Bun](https://bun.sh):
+Everything runs on [Bun](https://bun.sh).
 
-```sh
-bun install
-bun run check
-bun run tsc
-bun run test
-bun run validate
-bun run compile
-```
+- `bun install`: installs the dependencies, points Git at the hooks in `.githooks/` and writes `.claude/rules/package.md` from the bridge.
+- `bun run check`: checks lint and formatting with Biome; `bun run fix` applies the fixes.
+- `bun run tsc`: type-checks the code.
+- `bun run test`: runs the tests.
+- `bun run validate`: runs the checks the platform runs at publish, and fails while this README is out of date.
+- `bun run compile`: builds `dist/bridge`, the linux/amd64 binary the image starts.
 
-`validate` checks the manifest, assets, and driver wiring with the exact validation the platform runs at publish. `compile` produces `dist/bridge`, an amd64 binary — serverk publishes game images for `linux/amd64` only.
+`.githooks/pre-commit` runs `bun run fix`, `bun run tsc`, `bun run test`, `bun run validate` and `bunx serverk-bridge schema --check` before every commit. There is no CI: a commit that passes the hook is ready.
 
-The `.githooks/pre-commit` hook is the gate: it runs `fix`, `tsc`, `test`, `validate`, and `serverk-bridge schema --check` on every commit. `bun install` wires it up through the `prepare` script.
-
-The driver is built on [`@serverkgg/bridge`](https://www.npmjs.com/package/@serverkgg/bridge). `bun install` runs `serverk-bridge link`, which points `node_modules/@serverkgg/bridge` at a local `serverk` checkout when one sits beside this repository — never commit a `file:` dependency.
+`bun install` runs `serverk-bridge link`, which links `@serverkgg/bridge` to a sibling `serverk` checkout at `../serverk/modules/bridge` when one exists. Never commit a `file:` or `link:` dependency.
 
 ## Contribute
 
-- افتح issue لأي مشكلة أو اقتراح — بالعربي أو بالإنجليزي، كلها مرحّب فيها.
-- Run `bun run check`, `bun run tsc`, `bun run test` and `bun run validate` before you open a pull request — the same checks the pre-commit hook runs.
-- Releases are done by the Serverk team through the platform's central release pipeline; merged changes ride the next release.
+افتح issue لأي مشكلة أو اقتراح، بالعربية أو بالإنجليزية. ينشر فريق سيرفرك هذا الريبو من ريبو `serverk` بالأمر `bunx outdo package --prod --name rust`، ويصل كل تغيير مدموج مع النشر التالي. العربية هي لغة المصدر: يُكتب كل نص يقرؤه العميل بالعربية أولًا، بلغة رسمية مع لمسة خليجية خفيفة، ثم بالإنجليزية. أبقِ أسماء الملفات والأوامر والمفاتيح بالحروف اللاتينية.
 
-## Arabic copy
+Open an issue for any problem or suggestion, in Arabic or English. Serverk releases this repository from `serverk` with `bunx outdo package --prod --name rust`; merged changes ride the next release. Arabic is the source language: every string a customer reads is written in Arabic first, formal with a light Gulf touch, then in English. Keep file names, commands and config keys in Latin script.
 
-Arabic is the source language of the platform. Player-facing strings in `serverk.yml` and the guides use Gulf gaming Arabic — the game's Arabic name is always «رست», written solid.
+## License
+
+الكود متاح للقراءة، وجميع الحقوق محفوظة لمنصة سيرفرك، ولا يُمنح أي ترخيص.
+
+The code is public to read. All rights are reserved by Serverk, and no license is granted.
+
+يُنشأ هذا الملف بالأمر `serverk-bridge readme` من `serverk.yml`، فعدّل ملف التعريف لا هذا الملف.
+
+Generated by `serverk-bridge readme` from `serverk.yml`; edit the manifest, not this file.
