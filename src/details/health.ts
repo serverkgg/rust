@@ -1,4 +1,5 @@
 import { type Bridge, BridgeDetailFormat, BridgeDetailTone, BridgeKind } from "@serverkgg/bridge";
+import { formatUptime } from "@serverkgg/bridge/utils";
 import { type RustHealth, serverHealth } from "../shared";
 
 const REFRESH_SECONDS = 20;
@@ -7,65 +8,9 @@ export const SMOOTH_FPS_THRESHOLD = 30;
 
 export const LAG_FPS_THRESHOLD = 15;
 
-const MINUTE_SECONDS = 60;
-
-const HOUR_SECONDS = 3600;
-
 const MEGABYTE = 1_048_576;
 
 const MISSING = "—";
-
-const arabicCount = (count: number, one: string, two: string, few: string, many: string) => {
-	if (count === 1) {
-		return one;
-	}
-
-	if (count === 2) {
-		return two;
-	}
-
-	return `${count} ${count <= 10 ? few : many}`;
-};
-
-const arabicHours = (hours: number) => {
-	return arabicCount(hours, "ساعة", "ساعتين", "ساعات", "ساعة");
-};
-
-const arabicMinutes = (minutes: number) => {
-	return arabicCount(minutes, "دقيقة", "دقيقتين", "دقائق", "دقيقة");
-};
-
-export const formatUptime = (seconds: number): Bridge.Text => {
-	const total = Math.max(0, Math.floor(seconds));
-	const hours = Math.floor(total / HOUR_SECONDS);
-	const minutes = Math.floor((total % HOUR_SECONDS) / MINUTE_SECONDS);
-
-	if (hours === 0 && minutes === 0) {
-		return {
-			ar: "أقل من دقيقة",
-			en: "Less than a minute",
-		};
-	}
-
-	if (hours === 0) {
-		return {
-			ar: arabicMinutes(minutes),
-			en: `${minutes}m`,
-		};
-	}
-
-	if (minutes === 0) {
-		return {
-			ar: arabicHours(hours),
-			en: `${hours}h`,
-		};
-	}
-
-	return {
-		ar: `${arabicHours(hours)} و${arabicMinutes(minutes)}`,
-		en: `${hours}h ${minutes}m`,
-	};
-};
 
 export const fpsBadge = (fps: number): Bridge.DetailBadge => {
 	if (fps >= SMOOTH_FPS_THRESHOLD) {

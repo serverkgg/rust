@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { BridgeDetailFormat, BridgeDetailTone } from "@serverkgg/bridge";
 import { parseServerHealth } from "../shared";
-import { formatUptime, fpsBadge, healthBadges, healthStats, LAG_FPS_THRESHOLD, SMOOTH_FPS_THRESHOLD } from "./health";
+import { fpsBadge, healthBadges, healthStats, LAG_FPS_THRESHOLD, SMOOTH_FPS_THRESHOLD } from "./health";
 
 const HEALTH = parseServerHealth(
 	JSON.stringify({
@@ -35,40 +35,6 @@ describe("telling the player how smooth their server is running", () => {
 	it("calls anything below the lag threshold lagging", () => {
 		expect(fpsBadge(LAG_FPS_THRESHOLD - 1).tone).toBe(BridgeDetailTone.Danger);
 		expect(fpsBadge(0).tone).toBe(BridgeDetailTone.Danger);
-	});
-});
-
-describe("saying how long the server has been up", () => {
-	it("reads hours and minutes together", () => {
-		expect(formatUptime(7860)).toEqual({
-			ar: "ساعتين و11 دقيقة",
-			en: "2h 11m",
-		});
-	});
-
-	it("drops the minutes on a whole hour", () => {
-		expect(formatUptime(3600)).toEqual({
-			ar: "ساعة",
-			en: "1h",
-		});
-	});
-
-	it("drops the hours on a server that just started", () => {
-		expect(formatUptime(300)).toEqual({
-			ar: "5 دقائق",
-			en: "5m",
-		});
-	});
-
-	it("says less than a minute rather than zero", () => {
-		expect(formatUptime(12)).toEqual({
-			ar: "أقل من دقيقة",
-			en: "Less than a minute",
-		});
-	});
-
-	it("reads a negative uptime as less than a minute instead of a negative clock", () => {
-		expect(formatUptime(-60).en).toBe("Less than a minute");
 	});
 });
 
